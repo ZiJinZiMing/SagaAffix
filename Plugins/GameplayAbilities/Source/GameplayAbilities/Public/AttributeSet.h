@@ -74,7 +74,7 @@ struct GAMEPLAYABILITIES_API FGameplayAttribute
 	//ZhangJinming EndChange
 	bool IsValid() const
 	{
-		return Attribute != nullptr;
+		return Attribute.Get() != nullptr;
 	}
 
 	/** Set up from a FProperty inside a set */

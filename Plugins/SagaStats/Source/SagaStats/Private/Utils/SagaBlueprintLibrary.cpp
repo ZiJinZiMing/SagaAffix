@@ -41,3 +41,24 @@ bool USagaBlueprintLibrary::GetAttributeByPropertyName(const TSubclassOf<UAttrib
 	}
 	return false;
 }
+
+
+
+UAbilitySystemComponent* USagaBlueprintLibrary::GetInstigatorAbilitySystemComponentFromContext(FGameplayEffectContextHandle EffectContextHandle)
+{
+	// 检查上下文句柄是否有效 / Check if the context handle is valid
+	if (!EffectContextHandle.IsValid())
+	{
+		return nullptr;
+	}
+
+	// 获取上下文 / Get the context
+	const FGameplayEffectContext* Context = EffectContextHandle.Get();
+	if (!Context)
+	{
+		return nullptr;
+	}
+
+	// 获取发起者的能力系统组件 / Get the instigator's ability system component
+	return Context->GetInstigatorAbilitySystemComponent();
+}

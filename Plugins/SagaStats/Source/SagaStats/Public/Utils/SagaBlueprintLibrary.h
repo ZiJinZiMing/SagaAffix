@@ -12,6 +12,7 @@
 
 struct FSagaAttributeSetExecutionData;
 struct FGameplayAttribute;
+class UAbilitySystemComponent;
 
 
 /** Blueprint library for blueprint attribute sets */
@@ -54,4 +55,17 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Attributes")
 	static bool GetAttributeByPropertyName(const TSubclassOf<UAttributeSet>& AttributeSetClass, const FName& PropertyName, FGameplayAttribute& OutAttribute);
+
+	
+	/**
+	 * 从 GameplayEffectContextHandle 中获取 InstigatorAbilitySystemComponent
+	 * Gets the InstigatorAbilitySystemComponent from GameplayEffectContextHandle
+	 *
+	 * @param EffectContextHandle	要从中获取组件的上下文句柄 / The context handle to get the component from
+	 * @return 发起者的能力系统组件，如果无效则返回 nullptr / The instigator's ability system component, or nullptr if invalid
+	 */
+	UFUNCTION(BlueprintPure, Category = "Attributes")
+	static UAbilitySystemComponent* GetInstigatorAbilitySystemComponentFromContext(FGameplayEffectContextHandle EffectContextHandle);
+
+	
 };
