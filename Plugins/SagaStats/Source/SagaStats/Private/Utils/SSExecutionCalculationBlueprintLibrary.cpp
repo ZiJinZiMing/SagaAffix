@@ -107,3 +107,10 @@ bool USSExecutionCalculationBlueprintLibrary::AttemptCalculateTransientAggregato
 	EvaluateParameters.TargetTags = TargetTags;
 	return ExecutionParameters.AttemptCalculateTransientAggregatorMagnitude(InAggregatorIdentifier, EvaluateParameters, OutMagnitude);
 }
+
+bool USSExecutionCalculationBlueprintLibrary::RequirementsMet(const FGameplayTagContainer& TagContainer, const FGameplayTagRequirements& Requirements)
+{
+	// 调用引擎内置的标签需求检查方法 / Call engine's built-in tag requirement check method
+	return Requirements.RequirementsMet(TagContainer);
+}
+

@@ -53,4 +53,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Calculation")
 	static bool AttemptCalculateTransientAggregatorMagnitude(const FGameplayEffectCustomExecutionParameters& ExecutionParameters, FGameplayTag InAggregatorIdentifier, float& OutMagnitude);
 	
+	/**
+	 * 检查给定的标签容器是否满足指定的标签需求 / Check if the given tag container meets the specified tag requirements
+	 * @param TagContainer 要检查的标签容器 / Tag container to check
+	 * @param Requirements 标签需求 / Tag requirements
+	 * @return 如果满足需求则返回true / Returns true if requirements are met
+	 */
+	UFUNCTION(BlueprintPure, Category = "Calculation|Tags")
+	static bool RequirementsMet(const FGameplayTagContainer& TagContainer, const FGameplayTagRequirements& Requirements);
+	
 };
