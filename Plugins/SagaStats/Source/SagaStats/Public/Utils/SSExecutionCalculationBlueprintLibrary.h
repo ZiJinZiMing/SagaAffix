@@ -62,4 +62,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Calculation|Tags")
 	static bool RequirementsMet(const FGameplayTagContainer& TagContainer, const FGameplayTagRequirements& Requirements);
 	
+	/**
+	 * 打印FGameplayEffectCustomExecutionOutput中的修改器信息 / Print modifier information from FGameplayEffectCustomExecutionOutput
+	 * @param ExecutionOutput 要打印的执行输出 / Execution output to print
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Calculation|Debug")
+	static void PrintExecutionOutputModifiers(const FGameplayEffectCustomExecutionOutput& ExecutionOutput);
+
 };

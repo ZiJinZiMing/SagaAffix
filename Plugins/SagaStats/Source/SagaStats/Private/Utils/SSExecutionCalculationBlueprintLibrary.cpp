@@ -7,6 +7,7 @@
 
 #include "SagaStatsLog.h"
 #include "GameplayEffectExecutionCalculation.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 const FGameplayEffectSpec& USSExecutionCalculationBlueprintLibrary::GetOwningSpec(const FGameplayEffectCustomExecutionParameters& InExecutionParams)
 {
@@ -113,4 +114,26 @@ bool USSExecutionCalculationBlueprintLibrary::RequirementsMet(const FGameplayTag
 	// 调用引擎内置的标签需求检查方法 / Call engine's built-in tag requirement check method
 	return Requirements.RequirementsMet(TagContainer);
 }
+
+void USSExecutionCalculationBlueprintLibrary::PrintExecutionOutputModifiers(const FGameplayEffectCustomExecutionOutput& ExecutionOutput)
+{
+	// 获取输出修改器数组 / Get the output modifiers array
+	const TArray<FGameplayModifierEvaluatedData>& OutputModifiers = ExecutionOutput.GetOutputModifiers();
+	
+	// 打印修改器总数 / Print total number of modifiers
+	UE_LOG(LogTemp, Log, TEXT("ExecutionOutput包含 %d 个修改器 / ExecutionOutput contains %d modifiers"), OutputModifiers.Num(), OutputModifiers.Num());
+	
+	// 遍历并打印每个修改器的信息 / Iterate through and print information for each modifier
+	for (int32 Index = 0; Index < OutputModifiers.Num(); ++Index)
+	{
+		const FGameplayModifierEvaluatedData& Modifier = OutputModifiers[Index];
+		
+		// 打印修改器详细信息 / Print modifier details
+		UE_LOG(LogTemp, Log, TEXT("Modifier %d: 属性=%s, 数值=%.3f"), 
+			Index,
+			*Modifier.Attribute.GetName(), 
+			Modifier.Magnitude);
+	}
+}
+
 
