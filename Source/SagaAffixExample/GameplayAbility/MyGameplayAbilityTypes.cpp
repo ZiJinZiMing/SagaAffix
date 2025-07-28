@@ -32,8 +32,3 @@ namespace UE::MyGAS
 
 } // UE::SmartObject::EnabledReason
 
-
-bool FMyGameplayEffectContext::NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess)
-{
-	return Super::NetSerialize(Ar, Map, bOutSuccess) && TargetData.NetSerialize(Ar, Map, bOutSuccess);
-}

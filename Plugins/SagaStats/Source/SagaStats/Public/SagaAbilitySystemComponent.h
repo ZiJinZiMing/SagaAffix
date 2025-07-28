@@ -11,6 +11,7 @@
 #include "AbilitySystemComponent.h"
 #include "SagaAbilitySystemComponent.generated.h"
 
+class UDamageProcessUnit;
 class USagaMeterBase;
 class USagaDecreaseMeter;
 
@@ -27,10 +28,10 @@ class SAGASTATS_API USagaAbilitySystemComponent : public UAbilitySystemComponent
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category="Skills")
+	UFUNCTION(BlueprintCallable, Category="Attribute")
 	void RemoveAttributeSet(UAttributeSet* AttributeSet);
 
-	UFUNCTION(BlueprintCallable, Category="Skills")
+	UFUNCTION(BlueprintCallable, Category="Attribute")
 	void RemoveAttributeSetByClass(TSubclassOf<UAttributeSet> AttributeSetClass);
 
 	FOnAttributeSetAddOrRemoveEvent& GetAttributeSetAddOrRemoveDelegate(TSubclassOf<UAttributeSet> SetClass);
@@ -61,4 +62,22 @@ protected:
 	virtual void RemoveAllSpawnedAttributes() override;
 
 	virtual void OnRep_SpawnedAttributes(const TArray<UAttributeSet*>& PreviousSpawnedAttributes) override;
+
+
+	// ----------------------------------------------------------------------------------------------------------------
+	//	Affix
+	// ----------------------------------------------------------------------------------------------------------------
+
+public:
+	const TArray<TObjectPtr<UDamageProcessUnit>>& GetDamageProcessUnits() const { return DamageProcessUnits; };
+
+	TArray<TObjectPtr<UDamageProcessUnit>>& GetDamageProcessUnits_Mutable() { return DamageProcessUnits; };
+	
+	
+protected:
+	/*动态DamageProcessUnit*/
+	UPROPERTY(Transient,BlueprintReadOnly, Category="Damage")
+	TArray<TObjectPtr<UDamageProcessUnit>> DamageProcessUnits;
+
+	
 };

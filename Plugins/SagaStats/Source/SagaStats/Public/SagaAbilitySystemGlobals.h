@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemGlobals.h"
-#include "MyAbilitySystemGlobals.generated.h"
+#include "SagaAbilitySystemGlobals.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SAGAAFFIXEXAMPLE_API UMyAbilitySystemGlobals : public UAbilitySystemGlobals
+class SAGASTATS_API USagaAbilitySystemGlobals : public UAbilitySystemGlobals
 {
 	GENERATED_BODY()
 

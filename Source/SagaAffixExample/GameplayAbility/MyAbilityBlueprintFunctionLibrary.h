@@ -43,6 +43,7 @@ public:
 	static FGameplayAbilityTargetDataHandle MakeAttackDamageTargetDataHandle(const TSubclassOf<UDamageType>& InDamageType,UObject* InAction);
 
 	
+
 	
 	
 };

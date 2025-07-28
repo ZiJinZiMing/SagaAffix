@@ -3,6 +3,7 @@
 
 #include "MyAbilityBlueprintFunctionLibrary.h"
 
+#include "MyGameplayAbilityTypes.h"
 #include "Abilities/GameplayAbilityTypes.h"
 
 bool UMyAbilityBlueprintFunctionLibrary::IsForRemoteClient(const FGameplayAbilityActorInfo& ActorInfo)

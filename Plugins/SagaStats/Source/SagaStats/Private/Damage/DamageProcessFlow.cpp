@@ -1,0 +1,46 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Damage/DamageProcessFlow.h"
+
+#include "GameplayEffectTypes.h"
+#include "SagaAbilitySystemComponent.h"
+#include "Damage/AffixableDamageFlow.h"
+#include "Damage/DamageProcessUnit.h"
+
+void UDamageProcessFlow::Execute_Implementation(UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect, FGameplayEffectContextHandle Handle)const
+{
+	CalcDamage(DamageFlow, DamageEffect, Handle);
+
+	//DamageProcessor
+	if (USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(DamageFlow->GetAbilitySystemComponentFromActorInfo_Ensured()))
+	{
+		//Filter by DamageFlowTag
+		TArray<TObjectPtr<UDamageProcessUnit>> Units = ASC->GetDamageProcessUnits().FilterByPredicate([this](TObjectPtr<UDamageProcessUnit> Unit)
+		{
+			return Unit->DamageFlowTag == DamageFlowTag;
+		});
+
+		//Sort by Priority
+		Units.Sort([](const TObjectPtr<UDamageProcessUnit> A, const TObjectPtr<UDamageProcessUnit> B) { return A->Priority > B->Priority; });
+
+		//Execute
+		for (TObjectPtr<UDamageProcessUnit> Unit : Units)
+		{
+			Unit->Execute(this, DamageFlow, Handle);
+		}
+	}
+
+	//Apply to attributeset
+	ApplyDamage(DamageFlow, DamageEffect, Handle);
+}
+
+void UDamageProcessFlow::CalcDamage_Implementation(UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect, FGameplayEffectContextHandle Handle)const
+{
+}
+
+void UDamageProcessFlow::ApplyDamage_Implementation(UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect,
+	FGameplayEffectContextHandle Handle)const
+{
+	
+}
