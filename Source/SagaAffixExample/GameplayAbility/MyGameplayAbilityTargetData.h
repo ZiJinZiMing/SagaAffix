@@ -15,7 +15,7 @@ struct FAttackDamageTargetData : public FGameplayAbilityTargetData
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	TSubclassOf<UDamageType> DamageType;
+	TObjectPtr<UDamageType> DamageType;
 
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UObject> Action;

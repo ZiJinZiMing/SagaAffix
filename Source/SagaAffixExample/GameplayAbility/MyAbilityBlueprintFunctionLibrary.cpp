@@ -41,21 +41,21 @@ bool UMyAbilityBlueprintFunctionLibrary::IsPredictingClient(const FGameplayAbili
 	return false;
 }
 
-bool UMyAbilityBlueprintFunctionLibrary::GetAttackDamageTargetDataFromHandle(FGameplayAbilityTargetDataHandle Handle,
-	TSubclassOf<UDamageType>& OutDamageType, UObject*& OutAction, FGameplayTagContainer& OutDamageContext)
+UDamageType* UMyAbilityBlueprintFunctionLibrary::GetAttackDamageTargetDataFromHandle(FGameplayAbilityTargetDataHandle Handle,
+	bool& IsValid, UObject*& OutAction, FGameplayTagContainer& OutDamageContext)
 {
 	if (const FAttackDamageTargetData* TargetData = static_cast<const FAttackDamageTargetData*>(Handle.Get(0)))
 	{
-		OutDamageType = TargetData->DamageType;
+		IsValid = true;
 		OutAction = TargetData->Action;
 		OutDamageContext = TargetData->DamageContext;
-		return true;
+		return TargetData->DamageType;
 	}
-	return false;
+	IsValid = false;
+	return nullptr;
 }
 
-bool UMyAbilityBlueprintFunctionLibrary::SetAttackDamageTargetDataToHandle(FGameplayAbilityTargetDataHandle Handle, const TSubclassOf<UDamageType>& InDamageType,
-	UObject* InAction, const FGameplayTagContainer& InDamageContext)
+bool UMyAbilityBlueprintFunctionLibrary::SetAttackDamageTargetDataToHandle(FGameplayAbilityTargetDataHandle Handle, UDamageType* InDamageType, UObject* InAction, FGameplayTagContainer InDamageContext)
 {
 	if (FAttackDamageTargetData* TargetData = static_cast<FAttackDamageTargetData*>(Handle.Get(0)))
 	{
@@ -67,12 +67,13 @@ bool UMyAbilityBlueprintFunctionLibrary::SetAttackDamageTargetDataToHandle(FGame
 	return false;
 }
 
-FGameplayAbilityTargetDataHandle UMyAbilityBlueprintFunctionLibrary::MakeAttackDamageTargetDataHandle(const TSubclassOf<UDamageType>& InDamageType, UObject* InAction)
+FGameplayAbilityTargetDataHandle UMyAbilityBlueprintFunctionLibrary::MakeAttackDamageTargetDataHandle(UDamageType* InDamageType, UObject* InAction,  FGameplayTagContainer InDamageContext)
 {
 	FGameplayAbilityTargetDataHandle Handle;
 	FAttackDamageTargetData* TargetData = new FAttackDamageTargetData();
 	TargetData->DamageType = InDamageType;
 	TargetData->Action = InAction;
+	TargetData->DamageContext = InDamageContext;
 	Handle.Add(TargetData);
 	return Handle;
 }

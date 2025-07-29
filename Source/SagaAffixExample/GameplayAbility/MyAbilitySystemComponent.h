@@ -22,6 +22,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Abilities")
 	bool TryActivateAbilityByClassWithTargetData(TSubclassOf<UGameplayAbility> InAbilityToActivate, const FGameplayAbilityTargetDataHandle& TargetData);
 
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	bool TryActivateAbilityByClassWithGEContext(TSubclassOf<UGameplayAbility> InAbilityToActivate, const FGameplayEffectContextHandle& GEContextHandle);
+	
+	
 	UFUNCTION(BlueprintPure, Category = "Abilities")
 	FGameplayAbilityActorInfo GetGameplayAbilityActorInfo() const;
 

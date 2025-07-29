@@ -38,6 +38,24 @@ bool UMyAbilitySystemComponent::TryActivateAbilityByClassWithTargetData(TSubclas
 	return false;
 }
 
+bool UMyAbilitySystemComponent::TryActivateAbilityByClassWithGEContext(TSubclassOf<UGameplayAbility> InAbilityToActivate,
+	const FGameplayEffectContextHandle& GEContextHandle)
+{
+	UGameplayAbility* InAbilityCDO = InAbilityToActivate.GetDefaultObject();
+
+	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.Ability.Get() == InAbilityCDO)
+		{
+			FGameplayEventData EventData;
+			EventData.EventTag = UE::MyGAS::Tag_TryActivateAbility;
+			EventData.ContextHandle = GEContextHandle;
+			return InternalTryActivateAbility(Spec.Handle, ScopedPredictionKey, nullptr, nullptr, &EventData);
+		}
+	}
+	return false;
+}
+
 FGameplayAbilityActorInfo UMyAbilitySystemComponent::GetGameplayAbilityActorInfo() const
 {
 	return *(AbilityActorInfo.Get());

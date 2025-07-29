@@ -79,5 +79,10 @@ protected:
 	UPROPERTY(Transient,BlueprintReadOnly, Category="Damage")
 	TArray<TObjectPtr<UDamageProcessUnit>> DamageProcessUnits;
 
+
+	// ----------------------------------------------------------------------------------------------------------------
+	//	Abilities
+	// ----------------------------------------------------------------------------------------------------------------
+
 	
 };

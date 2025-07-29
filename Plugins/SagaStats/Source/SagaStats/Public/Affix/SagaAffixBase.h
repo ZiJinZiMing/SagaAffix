@@ -18,6 +18,8 @@ class SAGASTATS_API USagaAffixBase : public UGameplayAbility
 
 public:
 
+	USagaAffixBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	
 	UPROPERTY(Instanced, EditAnywhere, Category = Affix)
 	TArray<TObjectPtr<UDamageProcessUnit>> DamageProcessUnits;
 	

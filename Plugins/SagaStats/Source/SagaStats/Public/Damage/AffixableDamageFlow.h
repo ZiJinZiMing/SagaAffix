@@ -18,27 +18,35 @@ class SAGASTATS_API UAffixableDamageFlow : public UGameplayAbility
 
 public:
 	UAffixableDamageFlow(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	
-	
-	/**/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
-	TMap<FGameplayTag, TSubclassOf<UGameplayEffect>> DamageEffects;
+
 
 	/**/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
 	TObjectPtr<UDamageFlowPreset> DamagePreset;
 
 protected:
+	
+	/*
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+	*/
 
 	/**/
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
-	void DamageProcess(FGameplayEffectContextHandle ContextHandle);
+	void DamageProcess(FGameplayEffectContextHandle ContextHandle, const TMap<FGameplayTag, TSubclassOf<UGameplayEffect>>& DamageEffects);
 
-	/**/
+	/*
+	/*#1#
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
 	void DamageReaction(FGameplayEffectContextHandle ContextHandle);
 
+	/*#1#
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
+	void GetEffects(FGameplayEffectContextHandle ContextHandle, TMap<FGameplayTag, TSubclassOf<UGameplayEffect>>& OutDamageEffects);
 
+	/*#1#
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
+	void MakeDamageGEContext(const FGameplayEventData& TriggerEventData,FGameplayEffectContextHandle& OutContextHandle);
+	*/
 
+	
 };

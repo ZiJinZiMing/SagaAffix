@@ -31,16 +31,15 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable)
-	static bool GetAttackDamageTargetDataFromHandle(FGameplayAbilityTargetDataHandle Handle, TSubclassOf<UDamageType>& OutDamageType,UObject*& OutAction,FGameplayTagContainer& OutDamageContext);
+	static UPARAM(DisplayName=OutDamageType) UDamageType* GetAttackDamageTargetDataFromHandle(FGameplayAbilityTargetDataHandle Handle, bool& IsValid,UObject*& OutAction,FGameplayTagContainer& OutDamageContext);
 
 	
 	UFUNCTION(BlueprintCallable)
-	static bool SetAttackDamageTargetDataToHandle(FGameplayAbilityTargetDataHandle Handle,const TSubclassOf<UDamageType>& InDamageType,UObject* InAction,const FGameplayTagContainer& InDamageContext);
+	static bool SetAttackDamageTargetDataToHandle(FGameplayAbilityTargetDataHandle Handle, UDamageType* InDamageType, UObject* InAction, FGameplayTagContainer InDamageContext);
 
 	
-	
 	UFUNCTION(BlueprintCallable)
-	static FGameplayAbilityTargetDataHandle MakeAttackDamageTargetDataHandle(const TSubclassOf<UDamageType>& InDamageType,UObject* InAction);
+	static FGameplayAbilityTargetDataHandle MakeAttackDamageTargetDataHandle(UDamageType* InDamageType, UObject* InAction, FGameplayTagContainer InDamageContext);
 
 	
 

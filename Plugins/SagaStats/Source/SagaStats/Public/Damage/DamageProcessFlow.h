@@ -19,21 +19,25 @@ class SAGASTATS_API UDamageProcessFlow : public UObject
 	GENERATED_BODY()
 
 public:
-	
 	/**/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage")
 	FGameplayTag DamageFlowTag;
 
 	/**/
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
-	void Execute( UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect,FGameplayEffectContextHandle Handle) const;
+	UFUNCTION(BlueprintNativeEvent, Category = "Damage")
+	void Execute(UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect, const FGameplayEffectContextHandle& Handle) const;
 
 	/**/
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
-	void CalcDamage( UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect, FGameplayEffectContextHandle Handle)const;
-
-	/**/
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
-	void ApplyDamage( UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect,FGameplayEffectContextHandle Handle)const;
 	
+	void CalcDamage( UAffixableDamageFlow* DamageFlow, TSubclassOf<UGameplayEffect> DamageEffect, const FGameplayEffectContextHandle& Handle)const;
+
+	/**/
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Damage")
+	void ApplyDamage( UAffixableDamageFlow* DamageFlow, const FGameplayEffectContextHandle& Handle)const;
+
+
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	void ApplyDamageProcessUnits( UAffixableDamageFlow* DamageFlow, const FGameplayEffectContextHandle& Handle)const;
+
 };

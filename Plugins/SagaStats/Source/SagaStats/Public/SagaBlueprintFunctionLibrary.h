@@ -18,7 +18,14 @@ class SAGASTATS_API USagaBlueprintFunctionLibrary : public UBlueprintFunctionLib
 public:
 		
 	UFUNCTION(BlueprintCallable)
-	static bool GetTargetDataHandleFromGEContext(FGameplayEffectContextHandle EffectContextHandle,FGameplayAbilityTargetDataHandle& TargetDataHandle);
+	static bool GetTargetDataHandleFromGEContext(FGameplayEffectContextHandle EffectContextHandle,FGameplayAbilityTargetDataHandle& OutTargetDataHandle);
 
+	
+	UFUNCTION(BlueprintCallable)
+	static bool GEContextAppendTargetData(FGameplayEffectContextHandle EffectContextHandle,const FGameplayAbilityTargetDataHandle& TargetDataHandle);
+
+	UFUNCTION(BlueprintCallable)
+	static FGameplayEffectContextHandle AbilityMakeEffectContext(const UGameplayAbility* Ability);
+	
 	
 };

@@ -5,6 +5,11 @@
 
 #include "SagaAbilitySystemComponent.h"
 
+USagaAffixBase::USagaAffixBase(const FObjectInitializer& ObjectInitializer):Super(ObjectInitializer)
+{
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::Type::InstancedPerActor; 
+}
+
 void USagaAffixBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
