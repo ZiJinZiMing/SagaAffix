@@ -98,7 +98,6 @@ bool UDAGBuilder::BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs)
 {
     // 初始化数据结构 - Initialize data structures
     AdjacencyList.Empty();
-    IndegreeMap.Empty();
     TokenProviderMap.Empty();
     
     // 第一遍：建立提供者映射 - First pass: build provider map
@@ -107,7 +106,6 @@ bool UDAGBuilder::BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs)
         if (!DPU) continue;
         
         // 初始化入度为0 - Initialize indegree to 0
-        IndegreeMap.Add(DPU, 0);
         AdjacencyList.Add(DPU, TArray<USimpleDPU*>());
         
         // 注册令牌提供者 - Register token providers
@@ -141,7 +139,6 @@ bool UDAGBuilder::BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs)
             for (USimpleDPU* Provider : *ProvidersPtr)
             {
                 AdjacencyList[Provider].Add(DPU);
-                IndegreeMap[DPU]++;
                 
                 AddDiagnosticLog(FString::Printf(TEXT("建立令牌依赖：%s -> %s (通过令牌'%s')"), *Provider->DPUId, *DPU->DPUId, *RequiredToken));
             }
@@ -337,7 +334,6 @@ bool UDAGBuilder::IsNodeReady(USimpleDPU* Node, const TMap<USimpleDPU*, ENodeSta
 void UDAGBuilder::ClearState()
 {
     AdjacencyList.Empty();
-    IndegreeMap.Empty();
     TokenProviderMap.Empty();
     DiagnosticLog.Empty();
 }
