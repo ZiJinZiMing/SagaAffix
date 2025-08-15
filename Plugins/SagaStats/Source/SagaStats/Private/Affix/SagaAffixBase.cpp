@@ -17,7 +17,7 @@ void USagaAffixBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, co
 	if(USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponentFromActorInfo_Ensured()))
 	{
 		//DamageProcess
-		for (TObjectPtr<UDamageProcessUnit> Unit : DamageProcessUnits)
+		for (TObjectPtr<USagaDPU> Unit : DamageProcessUnits)
 		{
 			ASC->GetDamageProcessUnits_Mutable().Add(Unit);
 		}
@@ -40,7 +40,7 @@ void USagaAffixBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const F
 	if (USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponentFromActorInfo_Ensured()))
 	{
 		//DamageProcess
-		for (TObjectPtr<UDamageProcessUnit> Unit : DamageProcessUnits)
+		for (TObjectPtr<USagaDPU> Unit : DamageProcessUnits)
 		{
 			ASC->GetDamageProcessUnits_Mutable().Remove(Unit);
 		}

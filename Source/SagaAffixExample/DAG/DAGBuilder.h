@@ -116,7 +116,8 @@ public:
 
 private:
     // 邻接表：DPU -> 依赖它的DPU列表 - Adjacency List: DPU -> List of dependent DPUs
-    TMap<USimpleDPU*, TArray<USimpleDPU*>> AdjacencyList;
+    // 使用TWeakObjectPtr避免GC问题 - Use TWeakObjectPtr to avoid GC issues
+    TMap<TWeakObjectPtr<USimpleDPU>, TArray<TWeakObjectPtr<USimpleDPU>>> AdjacencyList;
 
 
     // 令牌提供者映射：令牌类型 -> 提供该令牌的DPU列表 - Token Provider Map: Token Type -> List of DPUs that provide it

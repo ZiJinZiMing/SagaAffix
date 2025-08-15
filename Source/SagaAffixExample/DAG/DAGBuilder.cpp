@@ -105,8 +105,8 @@ bool UDAGBuilder::BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs)
     {
         if (!DPU) continue;
         
-        // 初始化入度为0 - Initialize indegree to 0
-        AdjacencyList.Add(DPU, TArray<USimpleDPU*>());
+        TWeakObjectPtr<USimpleDPU> WeakDPU(DPU);
+        AdjacencyList.Add(WeakDPU, TArray<TWeakObjectPtr<USimpleDPU>>());
         
         // 注册令牌提供者 - Register token providers
         for (const FString& TokenType : DPU->ProducedTokens)
@@ -138,7 +138,9 @@ bool UDAGBuilder::BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs)
             // Create edges: All DPUs providing this token -> Current DPU
             for (USimpleDPU* Provider : *ProvidersPtr)
             {
-                AdjacencyList[Provider].Add(DPU);
+                TWeakObjectPtr<USimpleDPU> ProviderWeak(Provider);
+                TWeakObjectPtr<USimpleDPU> ConsumerWeak(DPU);
+                AdjacencyList[ProviderWeak].Add(ConsumerWeak);
                 
                 AddDiagnosticLog(FString::Printf(TEXT("建立令牌依赖：%s -> %s (通过令牌'%s')"), *Provider->DPUId, *DPU->DPUId, *RequiredToken));
             }
@@ -173,7 +175,8 @@ FDFSResult UDAGBuilder::ProcessDAGWithDFS(const TArray<USimpleDPU*>& DPUs)
         AddDiagnosticLog(TEXT("环检测失败：存在循环依赖"));
         return Result;
     }
-    
+
+	
     AddDiagnosticLog(TEXT("环检测通过，开始优先级排序..."));
     
     // 重置节点状态用于优先级排序 - Reset node state for priority-driven sorting
@@ -282,14 +285,19 @@ bool UDAGBuilder::DFSVisitForCycleCheck(USimpleDPU* Node, TMap<USimpleDPU*, ENod
     NodeState[Node] = ENodeState::Gray;
     
     // 访问所有子节点 - Visit all children
-    TArray<USimpleDPU*>* ChildrenPtr = AdjacencyList.Find(Node);
+    TWeakObjectPtr<USimpleDPU> WeakNode(Node);
+    TArray<TWeakObjectPtr<USimpleDPU>>* ChildrenPtr = AdjacencyList.Find(WeakNode);
     if (ChildrenPtr)
     {
-        for (USimpleDPU* Child : *ChildrenPtr)
+        for (const TWeakObjectPtr<USimpleDPU>& WeakChild : *ChildrenPtr)
         {
-            if (Child && DFSVisitForCycleCheck(Child, NodeState))
+            if (WeakChild.IsValid())
             {
-                return true; // 发现环路
+                USimpleDPU* Child = WeakChild.Get();
+                if (Child && DFSVisitForCycleCheck(Child, NodeState))
+                {
+                    return true; // 发现环路
+                }
             }
         }
     }
