@@ -82,8 +82,8 @@ struct SAGAAFFIXEXAMPLE_API FDAGBuildResult
 };
 
 /**
- * DAG构建器 - DAG Builder
- * 核心功能：依赖图构建、环检测、优先级驱动的线性排序
+ * DAG构建器 - DAG Builder  
+ * 核心功能：依赖图构建、环检测、纯DFS拓扑排序
  */
 UCLASS(BlueprintType)
 class SAGAAFFIXEXAMPLE_API UDAGBuilder : public UObject
@@ -115,7 +115,7 @@ public:
     FString GetBuildReport() const;
 
 private:
-    // 邻接表：DPU -> 依赖它的DPU列表 - Adjacency List: DPU -> List of dependent DPUs
+    // 邻接表：DPU -> 它依赖的DPU列表 - Adjacency List: DPU -> List of DPUs it depends on
     // 使用TWeakObjectPtr避免GC问题 - Use TWeakObjectPtr to avoid GC issues
     TMap<TWeakObjectPtr<USimpleDPU>, TArray<TWeakObjectPtr<USimpleDPU>>> AdjacencyList;
 
@@ -135,11 +135,11 @@ private:
     bool BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs);
 
     /**
-     * 统一DFS处理：环检测 + 优先级排序 - Unified DFS Processing: Cycle Detection + Priority-driven Sorting
+     * 纯DFS拓扑排序 - Pure DFS Topological Sort
      * @param DPUs 输入的DPU列表
-     * @return DFS处理结果（环检测+线性执行顺序）
+     * @return DFS处理结果（环检测+拓扑序列）
      */
-    FDFSResult ProcessDAGWithDFS(const TArray<USimpleDPU*>& DPUs);
+    FDFSResult ProcessDAGWithPureDFS(const TArray<USimpleDPU*>& DPUs);
 
     /**
      * DFS环检测 - DFS Cycle Detection
@@ -147,23 +147,22 @@ private:
      * @param NodeState 节点状态映射
      * @return 是否检测到环路
      */
-    bool HasCycleDFS(const TArray<USimpleDPU*>& DPUs, TMap<USimpleDPU*, ENodeState>& NodeState);
 
     /**
-     * DFS递归访问节点（环检测专用） - DFS Recursive Node Visit (for cycle detection)
+     * DFS递归访问节点（拓扑排序专用） - DFS Recursive Node Visit (for topological sort)
      * @param Node 当前访问的节点
      * @param NodeState 节点状态映射
+     * @param FinishOrder 完成时间顺序（用于构建拓扑序列）
      * @return 是否检测到环路
      */
-    bool DFSVisitForCycleCheck(USimpleDPU* Node, TMap<USimpleDPU*, ENodeState>& NodeState);
+    bool DFSVisitForTopologicalSort(USimpleDPU* Node, TMap<USimpleDPU*, ENodeState>& NodeState, TArray<USimpleDPU*>& FinishOrder);
 
     /**
-     * 检查节点是否就绪执行 - Check if Node is Ready for Execution
-     * @param Node 待检查的节点
-     * @param NodeState 节点状态映射
-     * @return 是否所有依赖的令牌提供者都已完成
+     * 获取当前节点直接依赖的所有节点 - Get all nodes that current node directly depends on
+     * @param Node 当前节点
+     * @return 当前节点依赖的节点列表
      */
-    bool IsNodeReady(USimpleDPU* Node, const TMap<USimpleDPU*, ENodeState>& NodeState);
+    TArray<USimpleDPU*> GetDirectDependencies(USimpleDPU* Node) const;
 
 
 

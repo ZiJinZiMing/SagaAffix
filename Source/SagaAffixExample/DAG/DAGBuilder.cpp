@@ -33,9 +33,9 @@ FDAGBuildResult UDAGBuilder::BuildDAG(const TArray<USimpleDPU*>& DPUs)
         return Result;
     }
     
-    // 3. DFS统一处理：环检测 + 优先级排序 - DFS Unified Processing: Cycle Detection + Priority-driven Sorting
-    AddDiagnosticLog(TEXT("步骤2: DFS统一处理（环检测+优先级排序）..."));
-    FDFSResult DFSResult = ProcessDAGWithDFS(DPUs);
+    // 3. 纯DFS拓扑排序：环检测 + 拓扑序列生成 - Pure DFS Topological Sort: Cycle Detection + Topological Ordering
+    AddDiagnosticLog(TEXT("步骤2: 纯DFS拓扑排序（环检测+拓扑序列生成）..."));
+    FDFSResult DFSResult = ProcessDAGWithPureDFS(DPUs);
     
     if (DFSResult.bHasCycle)
     {
@@ -45,15 +45,15 @@ FDAGBuildResult UDAGBuilder::BuildDAG(const TArray<USimpleDPU*>& DPUs)
         return Result;
     }
     
-    // 4. 直接使用DFS线性执行顺序 - Direct use of DFS linear execution order
-    AddDiagnosticLog(TEXT("步骤3: 存储线性执行顺序..."));
+    // 4. 直接使用DFS拓扑排序结果 - Direct use of DFS topological sort result  
+    AddDiagnosticLog(TEXT("步骤3: 存储DFS拓扑序列..."));
     Result.ExecutionOrder = DFSResult.ExecutionOrder;
     
     Result.bSuccess = true;
     Result.ErrorMessage = TEXT("DAG构建成功");
     Result.DiagnosticInfo = DiagnosticLog;
     
-    AddDiagnosticLog(FString::Printf(TEXT("=== DAG构建完成，线性执行顺序包含%d个DPU ==="), Result.ExecutionOrder.Num()));
+    AddDiagnosticLog(FString::Printf(TEXT("=== DAG构建完成，DFS拓扑序列包含%d个DPU ==="), Result.ExecutionOrder.Num()));
     
     return Result;
 }
@@ -72,21 +72,21 @@ void UDAGBuilder::ExecuteDAG(const FDAGBuildResult& BuildResult)
         return;
     }
     
-    UE_LOG(LogTemp, Warning, TEXT("=== 开始执行DAG，线性顺序包含%d个DPU ==="), BuildResult.ExecutionOrder.Num());
+    UE_LOG(LogTemp, Warning, TEXT("=== 开始执行DAG，DFS拓扑序列包含%d个DPU ==="), BuildResult.ExecutionOrder.Num());
     
-    // 直接按DFS确定的顺序执行 - Execute directly in DFS-determined order
+    // 直接按DFS拓扑序列执行 - Execute directly in DFS topological order
     for (int32 i = 0; i < BuildResult.ExecutionOrder.Num(); ++i)
     {
         USimpleDPU* DPU = BuildResult.ExecutionOrder[i];
         if (DPU)
         {
-            UE_LOG(LogTemp, Log, TEXT("[%d/%d] 执行: %s (P:%d)"), 
-                i + 1, BuildResult.ExecutionOrder.Num(), *DPU->DPUId, DPU->Priority);
+            UE_LOG(LogTemp, Log, TEXT("[%d/%d] 执行: %s"), 
+                i + 1, BuildResult.ExecutionOrder.Num(), *DPU->DPUId);
             DPU->Execute();
         }
     }
     
-    UE_LOG(LogTemp, Warning, TEXT("=== DAG线性执行完成 ==="));
+    UE_LOG(LogTemp, Warning, TEXT("=== DAG拓扑序列执行完成 ==="));
 }
 
 FString UDAGBuilder::GetBuildReport() const
@@ -134,15 +134,15 @@ bool UDAGBuilder::BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs)
                 return false;
             }
             
-            // 建立边：所有提供该令牌的DPU -> 当前DPU
-            // Create edges: All DPUs providing this token -> Current DPU
+            // 建立边：当前DPU -> 所有提供该令牌的DPU  
+            // Create edges: Current DPU -> All DPUs providing this token
             for (USimpleDPU* Provider : *ProvidersPtr)
             {
-                TWeakObjectPtr<USimpleDPU> ProviderWeak(Provider);
                 TWeakObjectPtr<USimpleDPU> ConsumerWeak(DPU);
-                AdjacencyList[ProviderWeak].Add(ConsumerWeak);
+                TWeakObjectPtr<USimpleDPU> ProviderWeak(Provider);
+                AdjacencyList[ConsumerWeak].Add(ProviderWeak);
                 
-                AddDiagnosticLog(FString::Printf(TEXT("建立令牌依赖：%s -> %s (通过令牌'%s')"), *Provider->DPUId, *DPU->DPUId, *RequiredToken));
+                AddDiagnosticLog(FString::Printf(TEXT("建立依赖关系：%s 依赖 %s (通过令牌'%s')"), *DPU->DPUId, *Provider->DPUId, *RequiredToken));
             }
         }
     }
@@ -150,11 +150,11 @@ bool UDAGBuilder::BuildDependencyGraph(const TArray<USimpleDPU*>& DPUs)
     return true;
 }
 
-FDFSResult UDAGBuilder::ProcessDAGWithDFS(const TArray<USimpleDPU*>& DPUs)
+FDFSResult UDAGBuilder::ProcessDAGWithPureDFS(const TArray<USimpleDPU*>& DPUs)
 {
     FDFSResult Result;
     TMap<USimpleDPU*, ENodeState> NodeState;
-    TSet<USimpleDPU*> ExecutedNodes;
+    TArray<USimpleDPU*> FinishOrder; // 记录DFS完成时间顺序
     
     // 初始化所有节点为白色 - Initialize all nodes as White
     for (USimpleDPU* DPU : DPUs)
@@ -165,113 +165,48 @@ FDFSResult UDAGBuilder::ProcessDAGWithDFS(const TArray<USimpleDPU*>& DPUs)
         }
     }
     
-    AddDiagnosticLog(TEXT("开始优先级驱动的迭代处理..."));
+    AddDiagnosticLog(TEXT("开始纯DFS拓扑排序..."));
     
-    // 首先进行环检测（使用DFS） - First perform cycle detection using DFS
-    if (HasCycleDFS(DPUs, NodeState))
+    // 对每个白色节点启动DFS - Start DFS from each white node
+    for (USimpleDPU* DPU : DPUs)
     {
-        Result.bHasCycle = true;
-        Result.CycleInfo = TEXT("检测到循环依赖");
-        AddDiagnosticLog(TEXT("环检测失败：存在循环依赖"));
-        return Result;
-    }
-
-	
-    AddDiagnosticLog(TEXT("环检测通过，开始优先级排序..."));
-    
-    // 重置节点状态用于优先级排序 - Reset node state for priority-driven sorting
-    for (auto& Pair : NodeState)
-    {
-        Pair.Value = ENodeState::White;
-    }
-    
-    // 迭代选择就绪的最高优先级节点 - Iteratively select ready nodes with highest priority
-    while (Result.ExecutionOrder.Num() < DPUs.Num())
-    {
-        // 找到所有就绪的节点 - Find all ready nodes
-        TArray<USimpleDPU*> ReadyNodes;
-        for (USimpleDPU* DPU : DPUs)
+        if (DPU && NodeState[DPU] == ENodeState::White)
         {
-            if (DPU && NodeState[DPU] == ENodeState::White && IsNodeReady(DPU, NodeState))
+            if (DFSVisitForTopologicalSort(DPU, NodeState, FinishOrder))
             {
-                ReadyNodes.Add(DPU);
+                Result.bHasCycle = true;
+                Result.CycleInfo = TEXT("DFS过程中检测到循环依赖");
+                AddDiagnosticLog(TEXT("环检测失败：DFS发现循环依赖"));
+                return Result;
             }
         }
-        
-        if (ReadyNodes.Num() == 0)
-        {
-            // 没有就绪节点但还有未处理节点，说明存在问题
-            Result.bHasCycle = true;
-            Result.CycleInfo = TEXT("无法找到就绪节点，可能存在未检测到的依赖问题");
-            AddDiagnosticLog(Result.CycleInfo);
-            return Result;
-        }
-        
-        // 按优先级排序（数值小优先） - Sort by priority (smaller value first)
-        ReadyNodes.Sort([](const USimpleDPU& A, const USimpleDPU& B) {
-            return A.Priority < B.Priority;
-        });
-        
-        // 选择最高优先级的就绪节点 - Select the highest priority ready node
-        USimpleDPU* SelectedNode = ReadyNodes[0];
-        
-        // 执行选中的节点 - Execute selected node
-        NodeState[SelectedNode] = ENodeState::Black;
-        ExecutedNodes.Add(SelectedNode);
-        Result.ExecutionOrder.Add(SelectedNode);
-        
-        AddDiagnosticLog(FString::Printf(TEXT("执行节点: %s (P:%d) [第%d个]"), 
-            *SelectedNode->DPUId, SelectedNode->Priority, Result.ExecutionOrder.Num()));
     }
     
-    Result.bHasCycle = false;
-    AddDiagnosticLog(FString::Printf(TEXT("优先级排序完成，执行顺序包含%d个节点"), Result.ExecutionOrder.Num()));
+    // DFS完成时间顺序直接就是拓扑序列 - DFS finish time order is directly the topological order
+    Result.ExecutionOrder = FinishOrder;
     
-    // 输出最终执行顺序 - Output final execution order
+    Result.bHasCycle = false;
+    AddDiagnosticLog(FString::Printf(TEXT("DFS拓扑排序完成，拓扑序列包含%d个节点"), Result.ExecutionOrder.Num()));
+    
+    // 输出最终拓扑序列 - Output final topological order
     for (int32 i = 0; i < Result.ExecutionOrder.Num(); ++i)
     {
         USimpleDPU* DPU = Result.ExecutionOrder[i];
-        AddDiagnosticLog(FString::Printf(TEXT("执行顺序[%d]: %s (P:%d)"), i + 1, *DPU->DPUId, DPU->Priority));
+        AddDiagnosticLog(FString::Printf(TEXT("拓扑序列[%d]: %s"), i + 1, *DPU->DPUId));
     }
     
     return Result;
 }
 
-bool UDAGBuilder::HasCycleDFS(const TArray<USimpleDPU*>& DPUs, TMap<USimpleDPU*, ENodeState>& NodeState)
-{
-    // 重置所有节点状态为白色 - Reset all nodes to White
-    for (auto& Pair : NodeState)
-    {
-        Pair.Value = ENodeState::White;
-    }
-    
-    AddDiagnosticLog(TEXT("开始DFS环检测..."));
-    
-    // 对每个白色节点进行DFS - DFS from each white node
-    for (USimpleDPU* DPU : DPUs)
-    {
-        if (DPU && NodeState[DPU] == ENodeState::White)
-        {
-            if (DFSVisitForCycleCheck(DPU, NodeState))
-            {
-                AddDiagnosticLog(FString::Printf(TEXT("在节点 %s 的DFS中检测到环路"), *DPU->DPUId));
-                return true;
-            }
-        }
-    }
-    
-    AddDiagnosticLog(TEXT("DFS环检测完成：未发现环路"));
-    return false;
-}
 
-bool UDAGBuilder::DFSVisitForCycleCheck(USimpleDPU* Node, TMap<USimpleDPU*, ENodeState>& NodeState)
+bool UDAGBuilder::DFSVisitForTopologicalSort(USimpleDPU* Node, TMap<USimpleDPU*, ENodeState>& NodeState, TArray<USimpleDPU*>& FinishOrder)
 {
     if (!Node) return false;
     
     // 如果节点已经是灰色，说明发现了后向边（环） - Gray node means back edge (cycle)
     if (NodeState[Node] == ENodeState::Gray)
     {
-        AddDiagnosticLog(FString::Printf(TEXT("检测到环路：访问灰色节点 %s"), *Node->DPUId));
+        AddDiagnosticLog(FString::Printf(TEXT("DFS检测到环路：访问灰色节点 %s"), *Node->DPUId));
         return true;
     }
     
@@ -283,56 +218,78 @@ bool UDAGBuilder::DFSVisitForCycleCheck(USimpleDPU* Node, TMap<USimpleDPU*, ENod
     
     // 标记节点为灰色（正在访问） - Mark node as Gray (visiting)
     NodeState[Node] = ENodeState::Gray;
+    AddDiagnosticLog(FString::Printf(TEXT("DFS开始访问: %s"), *Node->DPUId));
     
-    // 访问所有子节点 - Visit all children
-    TWeakObjectPtr<USimpleDPU> WeakNode(Node);
-    TArray<TWeakObjectPtr<USimpleDPU>>* ChildrenPtr = AdjacencyList.Find(WeakNode);
-    if (ChildrenPtr)
+    // 递归访问当前节点依赖的所有节点 - Recursively visit all dependencies of current node
+    TArray<USimpleDPU*> Dependencies = GetDirectDependencies(Node);
+    
+    // 按当前节点定义的依赖优先级排序 - Sort dependencies by current node's priority preferences
+    if (Dependencies.Num() > 1)
     {
-        for (const TWeakObjectPtr<USimpleDPU>& WeakChild : *ChildrenPtr)
+        Dependencies.Sort([Node](const USimpleDPU& A, const USimpleDPU& B) {
+            int32 PriorityA = Node->GetDependencyPriority(const_cast<USimpleDPU*>(&A));
+            int32 PriorityB = Node->GetDependencyPriority(const_cast<USimpleDPU*>(&B));
+            return PriorityA < PriorityB; // 数值小的优先
+        });
+        
+        // 记录排序后的依赖顺序
+        FString DependencyOrder = TEXT("依赖遍历顺序: ");
+        for (int32 i = 0; i < Dependencies.Num(); ++i)
         {
-            if (WeakChild.IsValid())
-            {
-                USimpleDPU* Child = WeakChild.Get();
-                if (Child && DFSVisitForCycleCheck(Child, NodeState))
-                {
-                    return true; // 发现环路
-                }
-            }
+            int32 Priority = Node->GetDependencyPriority(Dependencies[i]);
+            DependencyOrder += FString::Printf(TEXT("%s(P:%d)"), *Dependencies[i]->DPUId, Priority);
+            if (i < Dependencies.Num() - 1) DependencyOrder += TEXT(" -> ");
+        }
+        AddDiagnosticLog(FString::Printf(TEXT("对%s的%s"), *Node->DPUId, *DependencyOrder));
+    }
+    
+    for (USimpleDPU* Dependency : Dependencies)
+    {
+        if (Dependency && DFSVisitForTopologicalSort(Dependency, NodeState, FinishOrder))
+        {
+            return true; // 发现环路，传播错误
         }
     }
     
     // 标记节点为黑色（已完成） - Mark node as Black (completed)
     NodeState[Node] = ENodeState::Black;
+    FinishOrder.Add(Node); // 记录完成时间
+    
+    AddDiagnosticLog(FString::Printf(TEXT("DFS完成访问: %s [完成序号: %d]"), 
+        *Node->DPUId, FinishOrder.Num()));
     
     return false;
 }
 
-bool UDAGBuilder::IsNodeReady(USimpleDPU* Node, const TMap<USimpleDPU*, ENodeState>& NodeState)
+TArray<USimpleDPU*> UDAGBuilder::GetDirectDependencies(USimpleDPU* Node) const
 {
-    if (!Node) return false;
+    TArray<USimpleDPU*> Dependencies;
     
-    // 检查所有需要的令牌是否都已被提供 - Check if all required tokens are provided
-    for (const FString& RequiredToken : Node->RequiredTokens)
+    if (!Node) 
     {
-        TArray<USimpleDPU*>* ProvidersPtr = TokenProviderMap.Find(RequiredToken);
-        if (!ProvidersPtr || ProvidersPtr->Num() == 0)
+        return Dependencies;
+    }
+    
+    // 查找邻接表中当前节点的直接依赖 - Find direct dependencies in adjacency list
+    TWeakObjectPtr<USimpleDPU> WeakNode(Node);
+    const TArray<TWeakObjectPtr<USimpleDPU>>* DependencyPtr = AdjacencyList.Find(WeakNode);
+    
+    if (DependencyPtr)
+    {
+        for (const TWeakObjectPtr<USimpleDPU>& WeakDependency : *DependencyPtr)
         {
-            return false; // 没有提供者
-        }
-        
-        // 检查所有提供该令牌的DPU是否都已完成（黑色） - Check if all providers are completed (Black)
-        for (USimpleDPU* Provider : *ProvidersPtr)
-        {
-            const ENodeState* ProviderStatePtr = NodeState.Find(Provider);
-            if (!ProviderStatePtr || *ProviderStatePtr != ENodeState::Black)
+            if (WeakDependency.IsValid())
             {
-                return false; // 还有提供者未完成
+                USimpleDPU* Dependency = WeakDependency.Get();
+                if (Dependency)
+                {
+                    Dependencies.Add(Dependency);
+                }
             }
         }
     }
     
-    return true; // 所有依赖都已满足
+    return Dependencies;
 }
 
 

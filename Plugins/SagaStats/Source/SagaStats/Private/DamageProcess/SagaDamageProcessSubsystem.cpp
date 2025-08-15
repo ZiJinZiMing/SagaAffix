@@ -4,8 +4,8 @@
 #include "DamageProcess/SagaDamageProcessSubsystem.h"
 
 #include "SagaGameplayEffectContext.h"
-#include "DamageProcess/SagaDMDAG.h"
 #include "DamageProcess/SagaDPU.h"
+#include "DamageProcess/DAG/SagaDMDAG.h"
 
 void USagaDamageProcessSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -27,11 +27,11 @@ USagaDMDAG* USagaDamageProcessSubsystem::BuildDAG(FGameplayEffectContextHandle C
 	TArray<USagaDPU*> SatisfiedDPUPrototypes = CollectRelevantDPUs(ContextHandle);
 	if (SatisfiedDPUPrototypes.Num() > 0)
 	{
-		USagaDMDAG* DAG = NewObject<USagaDMDAG>();
+		/*USagaDMDAG* DAG = NewObject<USagaDMDAG>();
 		if (DAG->Build(ContextHandle, SatisfiedDPUPrototypes))
 		{
 			return DAG;
-		}
+		}*/
 	}
 	return nullptr;
 }

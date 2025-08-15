@@ -35,8 +35,53 @@ FString USimpleDPU::GetDebugInfo() const
             DebugInfo += FString::Printf(TEXT("%s "), *Token);
         }
     }
+
+    if (DependencyPriorityMappings.Num() > 0)
+    {
+        DebugInfo += TEXT("\n  Dependency Priorities: ");
+        for (const FDependencyPriorityMapping& Mapping : DependencyPriorityMappings)
+        {
+            DebugInfo += FString::Printf(TEXT("%s(P:%d) "), *Mapping.DependencyDPUId, Mapping.Priority);
+        }
+    }
     
     return DebugInfo;
+}
+
+int32 USimpleDPU::GetDependencyPriority(USimpleDPU* DependencyDPU) const
+{
+    if (!DependencyDPU)
+    {
+        return 0; // 默认优先级
+    }
+
+    // 在依赖优先级映射中查找
+    for (const FDependencyPriorityMapping& Mapping : DependencyPriorityMappings)
+    {
+        if (Mapping.DependencyDPUId == DependencyDPU->DPUId)
+        {
+            return Mapping.Priority;
+        }
+    }
+
+    // 如果未找到映射，返回默认优先级0（相同优先级）
+    return 0;
+}
+
+void USimpleDPU::SetDependencyPriority(const FString& DependencyDPUId, int32 PriorityValue)
+{
+    // 检查是否已存在该依赖的映射
+    for (FDependencyPriorityMapping& Mapping : DependencyPriorityMappings)
+    {
+        if (Mapping.DependencyDPUId == DependencyDPUId)
+        {
+            Mapping.Priority = PriorityValue;
+            return;
+        }
+    }
+
+    // 如果不存在，添加新的映射
+    DependencyPriorityMappings.Add(FDependencyPriorityMapping(DependencyDPUId, PriorityValue));
 }
 
 USimpleDPU* USimpleDPU::CreateApplyDamageDPU()
