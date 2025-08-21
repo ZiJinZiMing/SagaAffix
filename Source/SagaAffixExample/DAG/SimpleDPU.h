@@ -7,11 +7,11 @@
 #include "SimpleDPU.generated.h"
 
 /**
- * 依赖优先级映射项 - Dependency Priority Mapping Item
- * 用于指定当前DPU对特定依赖项的优先级偏好
+ * 依赖顺序映射项 - Dependency Order Mapping Item
+ * 用于指定当前DPU对特定依赖项的处理顺序偏好
  */
 USTRUCT(BlueprintType)
-struct SAGAAFFIXEXAMPLE_API FDependencyPriorityMapping
+struct SAGAAFFIXEXAMPLE_API FDependencyOrderMapping
 {
     GENERATED_BODY()
 
@@ -19,17 +19,17 @@ struct SAGAAFFIXEXAMPLE_API FDependencyPriorityMapping
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString DependencyDPUId;
 
-    // 优先级值(数值小优先执行) - Priority value (smaller value executes first)  
+    // 依赖顺序值(数值小优先处理) - Dependency order value (smaller value processes first)  
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 Priority = 0;
+    int32 DependencyOrder = 0;
 
-    FDependencyPriorityMapping()
+    FDependencyOrderMapping()
     {
-        Priority = 0;
+        DependencyOrder = 0;
     }
 
-    FDependencyPriorityMapping(const FString& InDPUId, int32 InPriority)
-        : DependencyDPUId(InDPUId), Priority(InPriority)
+    FDependencyOrderMapping(const FString& InDPUId, int32 InOrder)
+        : DependencyDPUId(InDPUId), DependencyOrder(InOrder)
     {
     }
 };
@@ -60,15 +60,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<FString> ProducedTokens;
 
-    // 优先级 - Priority (用于同层节点排序)
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 Priority;
-
-    // 依赖优先级映射 - Dependency Priority Mappings
-    // 用于指定当前DPU对其依赖项的DFS遍历优先级偏好
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dependency Ordering")
-    TArray<FDependencyPriorityMapping> DependencyPriorityMappings;
-
 public:
     USimpleDPU();
 
@@ -84,22 +75,6 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "DPU")
     FString GetDebugInfo() const;
-
-    /**
-     * 获取指定依赖DPU的优先级 - Get priority for specific dependency DPU
-     * @param DependencyDPU 依赖的DPU
-     * @return 优先级值，如果未指定则返回0（相同优先级）
-     */
-    UFUNCTION(BlueprintCallable, Category = "DPU Dependency")  
-    int32 GetDependencyPriority(USimpleDPU* DependencyDPU) const;
-
-    /**
-     * 设置依赖优先级 - Set dependency priority
-     * @param DependencyDPUId 依赖DPU的ID
-     * @param PriorityValue 优先级值
-     */
-    UFUNCTION(BlueprintCallable, Category = "DPU Dependency")
-    void SetDependencyPriority(const FString& DependencyDPUId, int32 PriorityValue);
 
     /**
      * 静态工厂方法：创建基础伤害DPU - Create Apply Damage DPU

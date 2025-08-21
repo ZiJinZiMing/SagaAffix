@@ -103,8 +103,8 @@ void UDAGBlueprintFunctionLibrary::GADMain()
     UE_LOG(LogTemp, Warning, TEXT("1. ✅ 令牌依赖图构建：根据RequiredTokens/ProducedTokens正确建立邻接表"));
     UE_LOG(LogTemp, Warning, TEXT("2. ✅ 多提供者支持：多个DPU可提供相同令牌，ApplyHealth等待所有damage_calculated"));
     UE_LOG(LogTemp, Warning, TEXT("3. ✅ 环检测：使用DFS三色标记成功检测Token循环依赖"));
-    UE_LOG(LogTemp, Warning, TEXT("4. ✅ 优先级排序：生成正确的线性执行计划"));
-    UE_LOG(LogTemp, Warning, TEXT("5. ✅ 优先级控制：严格按Priority控制执行顺序（CalcDamage -> CalcShield）"));
+    UE_LOG(LogTemp, Warning, TEXT("4. ✅ 依赖排序：生成正确的线性执行计划"));
+    UE_LOG(LogTemp, Warning, TEXT("5. ✅ 依赖顺序控制：严格按DependencyOrder控制执行顺序（CalcDamage -> CalcShield）"));
     UE_LOG(LogTemp, Warning, TEXT("6. ✅ 执行调度：按DFS确定的线性顺序执行DPU，Token权限传递清晰"));
     UE_LOG(LogTemp, Warning, TEXT("========================================"));
 }

@@ -45,7 +45,6 @@ public:
 		
 private:
 
-
 	/**/
     bool ValidateNodes();
 
@@ -53,13 +52,10 @@ private:
     bool BuildDependencyGraph();
 
 	/**/
-    bool TopoSort();
+	bool TopologicalSort();
 
-	/**/
-	bool CheckCycle(TMap<USagaDMDAGNode*, ENodeState>& NodeState);
-
-	/**/
-	static bool CheckNodeCycle(USagaDMDAGNode* Node, TMap<USagaDMDAGNode*, ENodeState>& NodeState);
+	/*返回值：是否成功访问，存在环路返回false*/
+	static bool CheckDFSVisit(USagaDMDAGNode* Node, TMap<USagaDMDAGNode*, ENodeState>& NodeState, TArray<USagaDMDAGNode*>& FinishOrder);
 
 	/**/
 	void SaveToMMD();

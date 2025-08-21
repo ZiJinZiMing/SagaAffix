@@ -73,7 +73,7 @@ UDAGBlueprintFunctionLibrary::GADMain();
 2. ✅ 多提供者支持：多个DPU可提供相同令牌，ApplyHealth等待所有damage_calculated
 3. ✅ 环检测：使用DFS三色标记成功检测Token循环依赖
 4. ✅ 优先级排序：生成正确的线性执行计划
-5. ✅ 优先级控制：严格按Priority控制执行顺序（CalcDamage -> CalcShield）
+5. ✅ 依赖顺序控制：严格按DependencyOrder控制执行顺序（CalcDamage -> CalcShield）
 6. ✅ 执行调度：按DFS确定的线性顺序执行DPU，Token权限传递清晰
 ```
 
@@ -92,7 +92,7 @@ UDAGBlueprintFunctionLibrary::GADMain();
 
 ### 3. 优先级驱动线性排序 ✅
 - 每次选择最高优先级的就绪节点
-- 严格按Priority控制执行顺序
+- 严格按DependencyOrder控制执行顺序
 - 多提供者等待：节点等待所有依赖令牌的提供者完成
 
 ### 4. 算法优势 ✅
@@ -103,12 +103,12 @@ UDAGBlueprintFunctionLibrary::GADMain();
 ## 重大技术迭代
 
 ### DFS统一算法替代（2025-08-07）
-**问题**: Kahn算法的批次处理导致优先级跨批次失效，CalcShield在CalcDamage之前执行
-**解决**: 实现优先级驱动的DFS统一算法，确保严格按Priority执行
+**问题**: Kahn算法的批次处理导致依赖顺序跨批次失效，CalcShield在CalcDamage之前执行
+**解决**: 实现依赖顺序驱动的DFS统一算法，确保严格按DependencyOrder执行
 
 **关键改进**:
 - 统一环检测和排序为一套DFS算法
-- 优先级驱动的逐节点选择替代批次分组
+- 依赖顺序驱动的逐节点选择替代批次分组
 - 多提供者等待逻辑确保令牌依赖正确
 
 ## 扩展方向

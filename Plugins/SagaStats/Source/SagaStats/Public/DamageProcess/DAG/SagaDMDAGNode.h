@@ -22,8 +22,6 @@ public:
 
 	virtual void GetProducedTokens(FGameplayTagContainer& OutProducedTokens) const;
 
-	virtual int GetPriority() const;
-	
 	virtual void Execute();
 
 	virtual FString GetNodeName() const;
@@ -31,7 +29,7 @@ public:
 protected:
 	friend class USagaDMDAG;
 	
-	/*依赖项*/
+	/*前置依赖项*/
 	TArray<TObjectPtr<USagaDMDAGNode>> PrerequisitesNodes;
 	
 };

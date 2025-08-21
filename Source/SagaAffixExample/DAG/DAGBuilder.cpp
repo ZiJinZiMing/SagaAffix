@@ -223,26 +223,6 @@ bool UDAGBuilder::DFSVisitForTopologicalSort(USimpleDPU* Node, TMap<USimpleDPU*,
     // 递归访问当前节点依赖的所有节点 - Recursively visit all dependencies of current node
     TArray<USimpleDPU*> Dependencies = GetDirectDependencies(Node);
     
-    // 按当前节点定义的依赖优先级排序 - Sort dependencies by current node's priority preferences
-    if (Dependencies.Num() > 1)
-    {
-        Dependencies.Sort([Node](const USimpleDPU& A, const USimpleDPU& B) {
-            int32 PriorityA = Node->GetDependencyPriority(const_cast<USimpleDPU*>(&A));
-            int32 PriorityB = Node->GetDependencyPriority(const_cast<USimpleDPU*>(&B));
-            return PriorityA < PriorityB; // 数值小的优先
-        });
-        
-        // 记录排序后的依赖顺序
-        FString DependencyOrder = TEXT("依赖遍历顺序: ");
-        for (int32 i = 0; i < Dependencies.Num(); ++i)
-        {
-            int32 Priority = Node->GetDependencyPriority(Dependencies[i]);
-            DependencyOrder += FString::Printf(TEXT("%s(P:%d)"), *Dependencies[i]->DPUId, Priority);
-            if (i < Dependencies.Num() - 1) DependencyOrder += TEXT(" -> ");
-        }
-        AddDiagnosticLog(FString::Printf(TEXT("对%s的%s"), *Node->DPUId, *DependencyOrder));
-    }
-    
     for (USimpleDPU* Dependency : Dependencies)
     {
         if (Dependency && DFSVisitForTopologicalSort(Dependency, NodeState, FinishOrder))

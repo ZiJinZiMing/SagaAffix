@@ -29,11 +29,14 @@ bool USagaDMDAG::Build(const TArray<USagaDMDAGNode*>& InNodes)
 	}
 
 	// 3. DFS统一处理：环检测 + 优先级排序
-	if (!TopoSort())
+	if (!TopologicalSort())
 	{
 		SS_LOG(Error, TEXT("DFS拓扑排序失败"));
 		return false;
 	}
+
+	//将组成的DAG结构绘制成MMD图标
+	SaveToMMD();
 	
 	return true;
 }
@@ -109,12 +112,11 @@ bool USagaDMDAG::BuildDependencyGraph()
 		for (const FGameplayTag& Token : RequiredTokens)
 		{
 			TArray<USagaDMDAGNode*>* Producers = TokenProducedMap.Find(Token);
-			if (!Producers || Producers->Num() == 0)
+			if (Producers && Producers->Num() > 0)
 			{
-				SS_LOG(Error, TEXT("节点%s的RequiredToken:[%s]没有生产者"), *Node->GetNodeName(), *Token.ToString());
-				Success = false;
+				Node->PrerequisitesNodes.Append(*Producers);
 			}
-			
+
 			Node->PrerequisitesNodes.Append(*Producers);
 		}
 	}
@@ -122,89 +124,69 @@ bool USagaDMDAG::BuildDependencyGraph()
 	return Success;
 }
 
-bool USagaDMDAG::TopoSort()
+bool USagaDMDAG::TopologicalSort()
 {
 	TMap<USagaDMDAGNode*, ENodeState> NodeState;
+    TArray<USagaDMDAGNode*> FinishOrder; // 记录DFS完成时间顺序
+	
 	// 初始化所有节点为白色
 	for (TObjectPtr<USagaDMDAGNode> Node : AllNodes)
 	{
 		NodeState.Add(Node, ENodeState::White);
 	}
-
-	//开始检测环
-	if (!CheckCycle(NodeState))
-	{
-		SS_LOG(Error, TEXT("检测到循环依赖"));
-		return false;
-	}
-
-	//环检测完毕，开始进行拓扑排序
-	//重置颜色
-	for (auto& Pair : NodeState)
-	{
-		Pair.Value = ENodeState::White;
-	}
-
-
 	
-	TArray<USagaDMDAGNode*> SortedNodes;
-	//todo:优先级排序，需要作用在同一节点下
-
-	
-
-	
-	
-	
-
-	return true;
-}
-
-bool USagaDMDAG::CheckCycle(TMap<USagaDMDAGNode*, ENodeState>& NodeState)
-{
-	//开始环检测
+	//开始DFS拓扑排序
+	// 对每个白色节点启动DFS - Start DFS from each white node
 	for (TObjectPtr<USagaDMDAGNode> Node : AllNodes)
 	{
 		if (NodeState[Node] == ENodeState::White)
 		{
-			if (!CheckNodeCycle(Node, NodeState))
+			if (CheckDFSVisit(Node,NodeState, FinishOrder))
 			{
-				SS_LOG(Error, TEXT("在节点 %s 中检测到环路"), *Node->GetNodeName());
+				//存在环依赖
+				SS_LOG(Error, TEXT("DFS拓扑排序过程中发现环依赖"));
 				return false;
 			}
 		}
 	}
 
+	AllNodes = FinishOrder;
+
 	return true;
 }
 
-bool USagaDMDAG::CheckNodeCycle(USagaDMDAGNode* Node, TMap<USagaDMDAGNode*, ENodeState>& NodeState)
+bool USagaDMDAG::CheckDFSVisit(USagaDMDAGNode* Node, TMap<USagaDMDAGNode*, ENodeState>& NodeState, TArray<USagaDMDAGNode*>& FinishOrder)
 {
-	// 如果节点已经是灰色，说明发现了后向边
+	check(Node);
+	
+	// 如果节点已经是灰色，说明发现了后向边（环） - Gray node means back edge (cycle)
 	if (NodeState[Node] == ENodeState::Gray)
 	{
-		SS_LOG(Error, TEXT("检测到环路：访问灰色节点 %s"), *Node->GetNodeName());
+		SS_LOG(Error, TEXT("DFS检测到环路：访问灰色节点 %s"),*Node->GetNodeName());
 		return false;
 	}
 
-	// 如果节点已经是黑色，说明已经处理过，直接返回 
+	// 如果节点已经是黑色，说明已经处理过，直接返回 - Black node is already processed
 	if (NodeState[Node] == ENodeState::Black)
 	{
 		return true;
 	}
 
-	// 标记节点为灰色（正在访问）
+	// 表示当前节点为白色，标记为灰色（正在访问） 
 	NodeState[Node] = ENodeState::Gray;
 
-	//继续访问前置节点
-	for (TObjectPtr<USagaDMDAGNode> Prerequisites : Node->PrerequisitesNodes)
+	for (TObjectPtr<USagaDMDAGNode> PrerequisitesNode : Node->PrerequisitesNodes)
 	{
-		if (!CheckNodeCycle(Prerequisites, NodeState))
+		if (!CheckDFSVisit(PrerequisitesNode, NodeState, FinishOrder))
 		{
+			//存在环路
 			return false;
 		}
 	}
 
-	// 标记节点为黑色（已完成）
+	//访问完成，标记黑色
 	NodeState[Node] = ENodeState::Black;
+    FinishOrder.Add(Node); // 记录完成时间
+	
 	return true;
 }

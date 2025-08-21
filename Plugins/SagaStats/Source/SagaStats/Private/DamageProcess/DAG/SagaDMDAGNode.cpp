@@ -25,8 +25,3 @@ void USagaDMDAGNode::GetProducedTokens(FGameplayTagContainer& OutProducedTokens)
 {
 	
 }
-
-int USagaDMDAGNode::GetPriority() const
-{
-	return 0;
-}
