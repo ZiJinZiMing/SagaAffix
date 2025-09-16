@@ -24,7 +24,12 @@ void USagaIncreaseMeter::InitFromMetaDataTable(const UDataTable* DataTable)
 void USagaIncreaseMeter::OnAccumulate_Implementation(const FSagaAttributeSetExecutionData& Data)
 {
 	Super::OnAccumulate_Implementation(Data);
-	
+}
+
+void USagaIncreaseMeter::PostAccumulate()
+{
+	Super::PostAccumulate();
+
 	if (GetImpactedAccumulate() > 0 && GetDegenerationCooldown() > 0.f)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(DegenerationCooldownTimer);

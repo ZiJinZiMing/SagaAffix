@@ -17,9 +17,36 @@
 
 
 /**
- * 
+ * @class USagaMeterBase
+ * @brief 通用的计量条属性集基类 (The base AttributeSet for meters like Health, Mana, etc.).
+ *
+ * @details
+ * 该类为所有“计量条”类型（如生命值、法力值、体力值）的属性集提供了基础功能。
+ * This class provides the basic functionality for all "meter" type AttributeSets (e.g., Health, Mana, Stamina).
+ *
+ * 核心属性 (Core Attributes):
+ * - Current: 计量条的当前值，其值会被钳制在 [0, Maximum] 范围内。
+ *   (The current value of the meter, clamped between [0, Maximum]).
+ * - Maximum: 计量条的最大值。
+ *   (The maximum value of the meter).
+ *
+ * 设计模式 (Design Pattern):
+ * 本类的核心设计是使用 "Accumulate" 和 "Reduce" 作为瞬时输入属性。外部GameplayEffect应该修改这两个属性，而不是直接修改 "Current"。
+ * The core design uses "Accumulate" and "Reduce" as transient input attributes. External GameplayEffects should modify these attributes instead of "Current" directly.
+ *
+ * 在 PostGameplayEffectExecute 中，当检测到 Accumulate 或 Reduce 属性被修改后，会触发相应的蓝图事件 OnAccumulate / OnReduce，然后立刻将这两个属性清零。
+ * In PostGameplayEffectExecute, after detecting a modification to Accumulate or Reduce, the corresponding Blueprint events (OnAccumulate / OnReduce) are fired,
+ * and these attributes are then immediately reset to zero.
+ *
+ * 使用方法 (Usage):
+ * 1. 创建一个 GameplayEffect 来修改 Accumulate (用于增加) 或 Reduce (用于减少) 的值。
+ *    Create a GameplayEffect to modify the value of Accumulate (for increases) or Reduce (for decreases).
+ * 2. 在该类的蓝图或C++子类中实现 OnAccumulate / OnReduce 事件，以定义如何根据输入值最终修改 Current 值。
+ *    Implement the OnAccumulate / OnReduce events in a Blueprint or C++ subclass to define how the Current value is ultimately modified based on the input.
+ *
+ * @see USagaIncreaseMeter, USagaDecreaseMeter
  */
-UCLASS(abstract, meta = (HideInDetailsView))
+UCLASS(Abstract, meta = (HideInDetailsView))
 class SAGASTATS_API USagaMeterBase : public USagaAttributeSet, public ITickableAttributeSetInterface
 {
 	GENERATED_BODY()
@@ -47,23 +74,26 @@ public:
 		SAGA_GAMEPLAYATTRIBUTE_REPNOTIFY(Maximum, OldValue);
 	}
 
-	SAGA_ATTRIBUTE_ACCESSORS(Accumulate);
 	UPROPERTY(EditDefaultsOnly, Category="Meter")
 	FGameplayAttributeData Accumulate;
-
-	SAGA_ATTRIBUTE_ACCESSORS(ImpactedAccumulate);
+	SAGA_ATTRIBUTE_ACCESSORS(Accumulate);
+	
 	UPROPERTY(EditDefaultsOnly, Category="Meter", meta=(HideFromModifiers))
 	FGameplayAttributeData ImpactedAccumulate;
+	SAGA_ATTRIBUTE_ACCESSORS(ImpactedAccumulate);
 
-	SAGA_ATTRIBUTE_ACCESSORS(Reduce);
 	UPROPERTY(EditDefaultsOnly, Category="Meter")
 	FGameplayAttributeData Reduce;
+	SAGA_ATTRIBUTE_ACCESSORS(Reduce);
 
-	SAGA_ATTRIBUTE_ACCESSORS(ImpactedReduce);
 	UPROPERTY(EditDefaultsOnly, Category="Meter", meta=(HideFromModifiers))
 	FGameplayAttributeData ImpactedReduce;
+	SAGA_ATTRIBUTE_ACCESSORS(ImpactedReduce);
 
-
+	/*在PostGameplayEffectExecute中执行结算*/
+	UPROPERTY(Transient, BlueprintReadWrite, VisibleAnywhere, Category="Meter")
+	uint8 bApplyToCurrentAtPostGameplayEffectExecute : 1;
+	
 public:
 	static bool GreaterOrNearlyEqual(float A, float B);
 
@@ -114,6 +144,16 @@ protected:
 	UFUNCTION(BlueprintNativeEvent)
 	void OnReduce(const FSagaAttributeSetExecutionData& Data);
 	virtual void OnReduce_Implementation(const FSagaAttributeSetExecutionData& Data);
+
+	/** Called after an Accumulate effect has been executed. */
+	virtual void PostAccumulate();
+
+	/** Called after a Reduce effect has been executed. */
+	virtual void PostReduce();
+
+	/**/
+	UFUNCTION(BlueprintCallable)
+	virtual void PostDamageProcess(float CurrentValue, float PrevCurrentValue, const FSagaAttributeSetExecutionData& Data);
 
 	//~begin ITickableAttributeSetInterface interface
 

@@ -41,18 +41,6 @@ void USagaDecreaseMeter::OnRep_MeterState(const EMeterState& OldValue)
 }
 
 
-void USagaDecreaseMeter::CalcGuardReduce_Implementation(USagaDecreaseMeter* ProtectedMeter,float InReduce, float& OutGuardReduce, float& OutRemainReduce) const
-{
-	OutGuardReduce = FMath::Min(InReduce, GetCurrent());
-	OutRemainReduce = InReduce - OutGuardReduce;
-}
-
-void USagaDecreaseMeter::SetDynamicGuardMeter(TSubclassOf<USagaDecreaseMeter> GuardMeter)
-{
-	DynamicGuardMeter = GuardMeter;
-	OnDynamicGuardMeterSet.Broadcast(GuardMeter);
-}
-
 void USagaDecreaseMeter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -69,6 +57,11 @@ void USagaDecreaseMeter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 void USagaDecreaseMeter::OnReduce_Implementation(const FSagaAttributeSetExecutionData& Data)
 {
 	Super::OnReduce_Implementation(Data);
+}
+
+void USagaDecreaseMeter::PostReduce()
+{
+	Super::PostReduce();
 
 	if (GetImpactedReduce() > 0 && GetRegenerationCooldown() > 0.f)
 	{

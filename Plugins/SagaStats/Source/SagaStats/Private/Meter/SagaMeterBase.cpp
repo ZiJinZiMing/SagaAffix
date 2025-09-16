@@ -13,7 +13,9 @@
 #include "Net/UnrealNetwork.h"
 
 
-USagaMeterBase::USagaMeterBase(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
+USagaMeterBase::USagaMeterBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+	, bApplyToCurrentAtPostGameplayEffectExecute(true)
 {
 	Current.MinValue.ClampType = ESagaClampingType::Float;
 	Current.MinValue.Value = METER_MINIMUM;
@@ -23,7 +25,6 @@ USagaMeterBase::USagaMeterBase(const FObjectInitializer& ObjectInitializer): Sup
 
 	InitMaximum(1.f);
 	InitAccumulate(0.f);
-
 }
 
 
@@ -66,17 +67,24 @@ void USagaMeterBase::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	if (Data.EvaluatedData.Attribute == GetAccumulateAttribute())
+	if (bApplyToCurrentAtPostGameplayEffectExecute)
 	{
-		const FSagaAttributeSetExecutionData ExecutionData(Data);
-		OnAccumulate(ExecutionData);
-		SetAccumulate(0);
-	}
-	else if (Data.EvaluatedData.Attribute == GetReduceAttribute())
-	{
-		const FSagaAttributeSetExecutionData ExecutionData(Data);
-		OnReduce(ExecutionData);
-		SetReduce(0);
+		if (Data.EvaluatedData.Attribute == GetAccumulateAttribute())
+		{
+			const FSagaAttributeSetExecutionData ExecutionData(Data);
+			OnAccumulate(ExecutionData);
+			SetAccumulate(0);
+
+			PostAccumulate();
+		}
+		else if (Data.EvaluatedData.Attribute == GetReduceAttribute())
+		{
+			const FSagaAttributeSetExecutionData ExecutionData(Data);
+			OnReduce(ExecutionData);
+			SetReduce(0);
+
+			PostReduce();
+		}
 	}
 }
 
@@ -93,6 +101,28 @@ void USagaMeterBase::OnReduce_Implementation(const FSagaAttributeSetExecutionDat
 	float OldCurrent = GetCurrent();
 	SetAttributeValue(GetCurrentAttribute(), OldCurrent - GetReduce());
 	SetImpactedReduce(OldCurrent - GetCurrent());
+}
+
+void USagaMeterBase::PostAccumulate()
+{
+}
+
+void USagaMeterBase::PostReduce()
+{
+}
+
+void USagaMeterBase::PostDamageProcess(float CurrentValue, float PrevCurrentValue, const FSagaAttributeSetExecutionData& Data)
+{
+	if (CurrentValue > PrevCurrentValue)
+	{
+		SetImpactedAccumulate(CurrentValue - PrevCurrentValue);
+		PostAccumulate();
+	}
+	else if (CurrentValue < PrevCurrentValue)
+	{
+		SetImpactedReduce(PrevCurrentValue - CurrentValue);
+		PostReduce();
+	}
 }
 
 void USagaMeterBase::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const

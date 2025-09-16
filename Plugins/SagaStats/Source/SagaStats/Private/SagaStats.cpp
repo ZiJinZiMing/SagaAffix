@@ -6,11 +6,19 @@
 
 #include "SagaStats.h"
 
+#include "SagaAbilitySystemComponent.h"
+#include "GameFramework/HUD.h"
+
 #define LOCTEXT_NAMESPACE "FSagaStatsModule"
 
 void FSagaStatsModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+
+	if (!IsRunningDedicatedServer())
+	{
+		AHUD::OnShowDebugInfo.AddStatic(&USagaAbilitySystemComponent::OnShowMeterDebugInfo);
+	}
 }
 
 void FSagaStatsModule::ShutdownModule()
