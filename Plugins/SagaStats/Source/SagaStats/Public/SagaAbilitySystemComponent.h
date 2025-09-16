@@ -65,22 +65,6 @@ protected:
 
 
 	// ----------------------------------------------------------------------------------------------------------------
-	//	Affix
-	// ----------------------------------------------------------------------------------------------------------------
-
-public:
-	const TArray<TObjectPtr<USagaDPU>>& GetDamageProcessUnits() const { return DamageProcessUnits; };
-
-	TArray<TObjectPtr<USagaDPU>>& GetDamageProcessUnits_Mutable() { return DamageProcessUnits; };
-	
-	
-protected:
-	/*动态DamageProcessUnit*/
-	UPROPERTY(Transient,BlueprintReadOnly, Category="Damage")
-	TArray<TObjectPtr<USagaDPU>> DamageProcessUnits;
-
-
-	// ----------------------------------------------------------------------------------------------------------------
 	//	Abilities
 	// ----------------------------------------------------------------------------------------------------------------
 

@@ -26,5 +26,5 @@ struct SAGASTATS_API FSagaStatsDelegates
 	static FSSOnPreCompile OnPreCompile;
 	static FSSOnPostCompile OnPostCompile;
 	
-	static FSSOnRequestDetailsRefresh OnRequestDetailsRefresh;
+	static FSSOnRequestDetailsRefresh OnRequestDetailsRefresh;	
 };

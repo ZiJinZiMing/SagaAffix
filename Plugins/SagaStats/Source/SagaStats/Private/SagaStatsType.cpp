@@ -5,5 +5,6 @@
 
 DEFINE_ENUM_TO_STRING(EMeterState, "/Script/SagaStats")
 
+//todo:Meter间关系，需要删除
 UE_DEFINE_GAMEPLAY_TAG(SagaMeter_Calc_Reduce, "SagaMeter.Calc.Reduce");
 

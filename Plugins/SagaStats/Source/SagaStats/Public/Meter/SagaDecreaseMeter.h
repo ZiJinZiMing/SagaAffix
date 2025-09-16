@@ -12,7 +12,7 @@
 #include "SagaDecreaseMeter.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnDynamicGuardMeterSet, TSubclassOf<USagaDecreaseMeter> /*GuardMeterClass*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDynamicGuardMeterSet, TSubclassOf<class USagaDecreaseMeter> /*GuardMeterClass*/);
 
 
 /**

@@ -6,10 +6,10 @@
 #include "FSSSwitchNodeReferencerHandler.h"
 
 #include "SSEditorLog.h"
-#include "Editor/SagaK2Node_SwitchGameplayAttribute.h"
 #include "EdGraph/EdGraph.h"
 #include "Engine/Blueprint.h"
 #include "SagaEditorSubsystem.h"
+#include "GraphNode/SagaK2Node_SwitchGameplayAttribute.h"
 
 
 TSharedPtr<ISSAttributeReferencerHandler> FSSSwitchNodeReferencerHandler::Create()

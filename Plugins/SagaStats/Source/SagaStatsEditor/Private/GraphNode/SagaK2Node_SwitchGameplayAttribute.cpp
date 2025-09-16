@@ -3,7 +3,7 @@
 * Author:       Jinming Zhang
 * Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
 ******************************************************************************************/
-#include "Editor/SagaK2Node_SwitchGameplayAttribute.h"
+#include "GraphNode/SagaK2Node_SwitchGameplayAttribute.h"
 
 #include "BlueprintActionDatabaseRegistrar.h"
 #include "BlueprintNodeSpawner.h"

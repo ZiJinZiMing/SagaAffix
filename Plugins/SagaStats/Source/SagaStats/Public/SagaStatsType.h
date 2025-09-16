@@ -18,5 +18,5 @@ enum class EMeterState : uint8
 };
 DECLARE_ENUM_TO_STRING(EMeterState);
 
-
+//todo:Meter间关系，需要删除
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(SagaMeter_Calc_Reduce);

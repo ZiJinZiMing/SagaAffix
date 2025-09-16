@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "SagaStats",
-	"Description": "SagaStats offers modular damage handling and meter systems to support adaptable status management",
+	"Description": "SagaStats offers modular damage process and meter systems to support adaptable status management",
 	"Category": "Other",
 	"CreatedBy": "Jinming Zhang",
 	"CreatedByURL": "",
@@ -22,7 +22,7 @@
 		},
 		{
 			"Name": "SagaStatsEditor",
-			"Type": "Editor",
+			"Type": "UncookedOnly",
 			"LoadingPhase": "PreLoadingScreen"
 		}
 	],
