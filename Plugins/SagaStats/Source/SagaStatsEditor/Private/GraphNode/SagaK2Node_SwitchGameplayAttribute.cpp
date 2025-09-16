@@ -8,9 +8,9 @@
 #include "BlueprintActionDatabaseRegistrar.h"
 #include "BlueprintNodeSpawner.h"
 #include "EdGraphSchema_K2.h"
+#include "AttributeSet/SagaBlueprintLibrary.h"
 #include "Engine/Blueprint.h"
 #include "Interfaces/IPluginManager.h"
-#include "Utils/SagaBlueprintLibrary.h"
 
 USagaK2Node_SwitchGameplayAttribute::USagaK2Node_SwitchGameplayAttribute(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

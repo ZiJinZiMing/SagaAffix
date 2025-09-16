@@ -3,11 +3,10 @@
 * Author:       Jinming Zhang
 * Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
 ******************************************************************************************/
-#include "Utils/SSExecutionCalculationBlueprintLibrary.h"
+#include "AttributeSet/SSExecutionCalculationBlueprintLibrary.h"
 
 #include "SagaStatsLog.h"
 #include "GameplayEffectExecutionCalculation.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 const FGameplayEffectSpec& USSExecutionCalculationBlueprintLibrary::GetOwningSpec(const FGameplayEffectCustomExecutionParameters& InExecutionParams)
 {

@@ -9,8 +9,8 @@
 #include "CoreMinimal.h"
 #include "VisualLogger/VisualLogger.h"
 #include "AbilitySystemComponent.h"
-#include "SagaAttributeSet.h"
 #include "TickableAttributeSetInterface.h"
+#include "AttributeSet/SagaAttributeSet.h"
 #include "SagaMeterBase.generated.h"
 
 #define METER_MINIMUM 0

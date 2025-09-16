@@ -5,8 +5,8 @@
 
 #include "AttributeSet.h"
 #include "GameplayEffect.h"
-#include "DAG/DAG.h"
-#include "DAG/DAGNodeTest.h"
+#include "DamageProcess/DAG/DAG.h"
+#include "DamageProcess/DAG/DAGNodeTest.h"
 
 
 void UDamageProcessFunctionLibrary::ShowDAGTest()

@@ -4,17 +4,17 @@
 * Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
 ******************************************************************************/
 
-#include "SagaAttributeSet.h"
+#include "AttributeSet/SagaAttributeSet.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "SagaStatsLog.h"
 #include "GameplayEffectExtension.h"
+#include "AttributeSet/SSUtils.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "GameFramework/PlayerController.h"
 #include "Misc/EngineVersionComparison.h"
 #include "UObject/UnrealType.h"
-#include "Utils/SSUtils.h"
 
 #if UE_VERSION_NEWER_THAN(5, 3, -1)
 #include "Misc/DataValidation.h"

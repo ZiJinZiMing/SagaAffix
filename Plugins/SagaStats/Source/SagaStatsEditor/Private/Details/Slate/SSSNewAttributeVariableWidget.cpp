@@ -16,7 +16,7 @@
 #include "PinTypeSelectorFilter.h"
 #include "ScopedTransaction.h"
 #include "SlateOptMacros.h"
-#include "SagaAttributeSet.h"
+#include "AttributeSet/SagaAttributeSet.h"
 #include "Details/Slate/SSSVariableRowWidget.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Kismet2/BlueprintEditorUtils.h"

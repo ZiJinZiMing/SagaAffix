@@ -7,11 +7,11 @@
 #include "SagaEditorSubsystem.h"
 
 #include "Editor.h"
-#include "SagaStatsDelegates.h"
 #include "SSEditorLog.h"
 #include "GameplayEffect.h"
 #include "K2Node.h"
 #include "MessageLogModule.h"
+#include "SagaStatsDelegates.h"
 #include "TimerManager.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/BlueprintEditorUtils.h"

@@ -7,7 +7,6 @@
 
 #include "AssetTypes/SagaAssetTypeActions_AttributeSet.h"
 
-#include "SagaAttributeSet.h"
 #include "AssetTypes/SagaBlueprintFactory.h"
 #include "Editor/SagaAttributeSetBlueprintEditor.h"
 #include "Misc/MessageDialog.h"

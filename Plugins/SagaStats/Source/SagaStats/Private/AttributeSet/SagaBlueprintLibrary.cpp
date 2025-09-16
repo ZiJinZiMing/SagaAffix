@@ -3,9 +3,9 @@
 * Author:       Jinming Zhang
 * Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
 ******************************************************************************************/
-#include "Utils/SagaBlueprintLibrary.h"
+#include "AttributeSet/SagaBlueprintLibrary.h"
 
-#include "SagaAttributeSet.h"
+#include "AttributeSet/SagaAttributeSet.h"
 
 FString USagaBlueprintLibrary::GetDebugStringFromExecutionData(const FSagaAttributeSetExecutionData& ExecutionData)
 {

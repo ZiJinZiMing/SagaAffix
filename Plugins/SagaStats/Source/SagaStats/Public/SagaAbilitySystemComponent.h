@@ -7,13 +7,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SagaStatsType.h"
 #include "AbilitySystemComponent.h"
 #include "SagaAbilitySystemComponent.generated.h"
 
-class USagaDPU;
 class USagaMeterBase;
 class USagaDecreaseMeter;
+enum class EMeterState : uint8;
+
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAttributeSetAddOrRemoveEvent, UAttributeSet* /*AttributeSet*/, bool /*IsAdd*/)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMeterEmptiedEvent, USagaMeterBase* /*Meter*/)

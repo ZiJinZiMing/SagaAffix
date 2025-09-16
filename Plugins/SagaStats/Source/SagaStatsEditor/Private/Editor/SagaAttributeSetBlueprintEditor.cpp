@@ -9,7 +9,7 @@
 #include "EdGraphSchema_K2.h"
 #include "SagaStatsDelegates.h"
 #include "SSEditorLog.h"
-#include "SagaAttributeSetBlueprint.h"
+#include "AttributeSet/SagaAttributeSetBlueprint.h"
 #include "Details/Slate/SSNewAttributeViewModel.h"
 #include "Details/Slate/SSSNewAttributeVariableWidget.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"

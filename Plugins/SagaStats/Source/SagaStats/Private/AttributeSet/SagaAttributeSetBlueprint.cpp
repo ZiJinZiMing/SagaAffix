@@ -5,10 +5,10 @@
 ******************************************************************************************/
 #pragma once
 
-#include "SagaAttributeSetBlueprint.h"
+#include "AttributeSet/SagaAttributeSetBlueprint.h"
 
-#include "SagaStatsDelegates.h"
 #include "SagaStatsLog.h"
+#include "SagaStatsDelegates.h"
 #include "Misc/EngineVersionComparison.h"
 #include "UObject/UObjectGlobals.h"
 

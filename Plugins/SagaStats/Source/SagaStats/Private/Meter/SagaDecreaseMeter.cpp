@@ -10,6 +10,7 @@
 #include "SagaAbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
 
+DEFINE_ENUM_TO_STRING(EMeterState, "/Script/SagaStats")
 
 
 USagaDecreaseMeter::USagaDecreaseMeter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)

@@ -8,11 +8,11 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/Async/AbilityAsync.h"
-#include "SagaStatsType.h"
 #include "AbilityAsync_WaitMeterStateChange.generated.h"
 
 
 class USagaDecreaseMeter;
+enum class EMeterState : uint8;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWaitMeterStateChangeEvent, USagaDecreaseMeter*, Meter, EMeterState, NewState,EMeterState, OldState);
 
 /**

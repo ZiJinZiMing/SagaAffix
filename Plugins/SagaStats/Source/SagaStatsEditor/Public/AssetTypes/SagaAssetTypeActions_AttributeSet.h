@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "AssetTypeActions/AssetTypeActions_Blueprint.h"
-#include "SagaAttributeSetBlueprint.h"
+#include "AttributeSet/SagaAttributeSetBlueprint.h"
 
 class FSagaAssetTypeActions_AttributeSet : public FAssetTypeActions_Blueprint
 {

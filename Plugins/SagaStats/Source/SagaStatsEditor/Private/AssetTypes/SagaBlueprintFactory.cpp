@@ -14,8 +14,9 @@
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "BlueprintEditorSettings.h"
-#include "SagaAttributeSetBlueprint.h"
-#include "SagaAttributeSet.h"
+#include "AttributeSet/SagaAttributeSet.h"
+#include "AttributeSet/SagaAttributeSetBlueprint.h"
+
 
 #define LOCTEXT_NAMESPACE "USagaBlueprintFactory"
 

@@ -10,7 +10,7 @@
 #include "SSEditorLog.h"
 #include "Details/SSGameplayAttributeDataDetailsRow.h"
 #include "IDetailChildrenBuilder.h"
-#include "SagaAttributeSet.h"
+#include "AttributeSet/SagaAttributeSet.h"
 #include "Widgets/Text/STextBlock.h"
 
 #define LOCTEXT_NAMESPACE "SagaGameplayAttributeDataDetails"

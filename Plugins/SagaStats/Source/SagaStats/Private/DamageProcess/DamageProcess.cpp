@@ -3,9 +3,9 @@
 
 #include "DamageProcess/DamageProcess.h"
 
-#include "DAG/DAG.h"
 #include "DamageProcess/DamageProcessAttribute.h"
 #include "DamageProcess/DamageProcessOperation.h"
+#include "DamageProcess/DAG/DAG.h"
 
 void UDamageProcess::Execute()
 {

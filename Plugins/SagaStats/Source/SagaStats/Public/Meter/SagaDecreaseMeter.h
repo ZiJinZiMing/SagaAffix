@@ -8,11 +8,21 @@
 
 #include "CoreMinimal.h"
 #include "SagaMeterBase.h"
-#include "SagaStatsType.h"
 #include "SagaDecreaseMeter.generated.h"
 
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDynamicGuardMeterSet, TSubclassOf<class USagaDecreaseMeter> /*GuardMeterClass*/);
+
+/*State of Meter*/
+UENUM(BlueprintType)
+enum class EMeterState : uint8
+{
+	Normal,
+	Lock,
+	Reset,
+};
+DECLARE_ENUM_TO_STRING(EMeterState);
+
 
 
 /**
