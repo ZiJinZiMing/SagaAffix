@@ -15,7 +15,7 @@
 
 USagaMeterBase::USagaMeterBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-	, bApplyToCurrentAtPostGameplayEffectExecute(true)
+	, bManualUpdateCurrent(false)
 {
 	Current.MinValue.ClampType = ESagaClampingType::Float;
 	Current.MinValue.Value = METER_MINIMUM;
@@ -67,7 +67,7 @@ void USagaMeterBase::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	if (bApplyToCurrentAtPostGameplayEffectExecute)
+	if (!bManualUpdateCurrent)
 	{
 		if (Data.EvaluatedData.Attribute == GetAccumulateAttribute())
 		{

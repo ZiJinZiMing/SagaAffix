@@ -91,8 +91,9 @@ public:
 	SAGA_ATTRIBUTE_ACCESSORS(ImpactedReduce);
 
 	/*在PostGameplayEffectExecute中执行结算*/
+	/*todo:ManualUpdateCurrent*/
 	UPROPERTY(Transient, BlueprintReadWrite, VisibleAnywhere, Category="Meter")
-	uint8 bApplyToCurrentAtPostGameplayEffectExecute : 1;
+	uint8 bManualUpdateCurrent : 1;
 	
 public:
 	static bool GreaterOrNearlyEqual(float A, float B);

@@ -162,39 +162,45 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 *
 	 * 【整体布局设计 / Overall Layout Design】
 	 * ┌─────────────────────────────────────────────────────────────────────────────────┐
-	 * │ [状态色]Health [Lock]████████████████████░░░░░░░░ 100/150 (CD 2.3s)              │
-	 * │    Max: 150.0, bClear: false, Regen: 5.0, RegenCD: 3.0,                      │
-	 * │    LockDur: 2.0, ResetRate: 20.0, ImmuneThresh: 10.0                          │
+	 * │ [状态色]Health [Lock 1.2/2.0]████████████████████░░ 100/150 (+5.0,CD:2.3/3.0)   │
+	 * │    [青色]Regen: 5.0, RegenCD: 3.0, [青色]LockDur: 2.0,                        │
+	 * │    ResetRate: 20.0, [青色]ImmuneThresh: 10.0                                  │
 	 * │                                                                                 │
-	 * │ [状态色]Mana        ████████████████████████████ 150/150 (+2.5/s)              │
-	 * │    Max: 150.0, bClear: true, Degen: 1.0, DegenCD: 5.0                         │
+	 * │ [状态色]Mana [Normal]████████████████████████████ 150/150 (-1.0,CD:4.2/5.0)     │
+	 * │    Degen: 1.0, [青色]DegenCD: 5.0                                             │
 	 * │                                                                                 │
-	 * │ [状态色]Shield      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░  25/100 (Locked)               │
-	 * │    Max: 100.0, bClear: false, Regen: 10.0, RegenCD: 1.0,                     │
-	 * │    LockDur: 0.0, ResetRate: 0.0, ImmuneThresh: 0.0                            │
+	 * │ [状态色]Shield [Reset 10.0/s]██░░░░░░░░░░░░░░░░░░░  25/100 (Reset 10.0/s)        │
+	 * │    Regen: 10.0, RegenCD: 1.0, LockDur: 0.0,                                  │
+	 * │    [青色]ResetRate: 10.0, ImmuneThresh: 0.0                                   │
 	 * └─────────────────────────────────────────────────────────────────────────────────┘
 	 *    ↑                    ↑                          ↑
-	 *  Meter名称           进度条(12px高)             数值+状态信息
+	 *  Meter名称           进度条(10px高)             数值+状态信息
+	 *  (带阴影效果)        (200px宽)                  (新格式显示)
 	 *    ↑
-	 *  属性信息行(白色文字+黑色阴影，缩进30px，智能换行)
+	 *  属性信息行(多彩文字+黑色阴影，缩进30px，智能换行，高亮关键字段) 
 	 *
 	 * 【核心功能 / Core Features】
-	 * ✅ 智能Meter名称格式化 (移除前后缀，添加状态标记)
+	 * ✅ 智能Meter名称格式化 (移除前后缀，添加详细状态标记)
 	 * ✅ 状态驱动的颜色编码 (名称、进度条根据状态变色)
-	 * ✅ 实时CD计时器显示 (精确到0.1秒)
-	 * ✅ 完整属性信息展示 (多行智能换行)
-	 * ✅ 高对比度文字渲染 (黑色阴影+白色文字)
+	 * ✅ 实时CD计时器显示 (精确到0.1秒，显示剩余时间/总时间)
+	 * ✅ 关键属性智能高亮 (根据状态动态高亮相关字段)
+	 * ✅ 高对比度文字渲染 (黑色阴影+彩色文字)
 	 * ✅ 免疫状态可视化 (灰色进度条)
 	 * ✅ 响应式布局设计 (自适应宽度)
+	 * ✅ 新增Normal状态标识 (显示[Normal]标记)
 	 *
 	 * 【Meter名称处理 / Meter Name Processing】
 	 * ├─ 自动格式化: 移除"Meter_"前缀和"_C"后缀
-	 * ├─ 状态标记: USagaDecreaseMeter显示[Lock]/[Reset]状态
-	 * ├─ 示例转换: "SagaMeter_Health_C" → "Health [Lock]"
-	 * └─ 颜色编码: Normal=绿色, Lock=红色, Reset=橙色
+	 * ├─ 详细状态标记:
+	 * │  ├─ Normal: "Health [Normal]"
+	 * │  ├─ Lock: "Health [Lock 1.2/2.0]" (显示剩余/总时间)
+	 * │  └─ Reset: "Shield [Reset 10.0/s]" (显示重置速率)
+	 * ├─ 示例转换: "SagaMeter_Health_C" → "Health [Lock 1.2/2.0]"
+	 * ├─ 颜色编码: Normal=绿色, Lock=红色, Reset=橙色
+	 * └─ 阴影效果: 黑色阴影增强文字对比度
 	 *
 	 * 【进度条系统 / Progress Bar System】
-	 * ├─ 尺寸规格: 200px × 10px (紧凑设计)
+	 * ├─ 尺寸规格: 200px × 10px (优化后的紧凑设计)
 	 * ├─ 边框样式: 0.5px白色边框
 	 * ├─ 背景颜色: 深灰色(40,40,40,200)
 	 * ├─ 填充逻辑: 当前值/最大值百分比
@@ -204,35 +210,41 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 * ├─ 位置布局: 进度条右侧10px偏移
 	 * ├─ 字体设置: SmallFont 1.0x缩放
 	 * ├─ 颜色方案: 黑色阴影+白色文字
-	 * ├─ 格式规则: "当前值/最大值 (CD信息)" 或 "当前值/最大值"
+	 * ├─ 新格式规则: "当前值/最大值 (速率信息,CD:剩余/总时间)"
 	 * └─ CD信息: 根据Meter类型和状态动态生成
 	 *
 	 * 【CD信息生成规则 / CD Info Generation Rules】
-	 * USagaDecreaseMeter:
-	 *   ├─ 活跃计时器优先: "CD X.Xs" | "Lock X.Xs"
-	 *   ├─ Normal状态: "+X.X/s" (恢复速率)
-	 *   ├─ Reset状态: "Reset +X.X/s" (重置速率)
+	 * USagaDecreaseMeter (新格式):
+	 *   ├─ 冷却中: "(+5.0,CD:2.3/3.0)" - 显示恢复速率和冷却进度
+	 *   ├─ 锁定中: "Lock 1.2/2.0" - 显示锁定剩余/总时间
+	 *   ├─ Normal状态: "+X.X/s" (恢复速率，当regen>0时)
+	 *   ├─ Reset状态: "Reset X.X/s" (重置速率)
 	 *   └─ Lock状态: "Locked" (无计时器时)
 	 *
-	 * USagaIncreaseMeter:
-	 *   ├─ 衰减冷却: "CD X.Xs" (DegenerationCooldownTimer)
+	 * USagaIncreaseMeter (新格式):
+	 *   ├─ 冷却中: "(-1.0,CD:4.2/5.0)" - 显示衰减速率和冷却进度
 	 *   └─ 正常衰减: "-X.X/s" (衰减速率)
 	 *
 	 * 【属性信息系统 / Attribute Info System】
 	 * ├─ 智能布局: 每个Meter下方，缩进30px
-	 * ├─ 文字渲染: 白色文字+黑色阴影(1px偏移)
+	 * ├─ 多彩渲染: 彩色文字+黑色阴影(1px偏移)
+	 * ├─ 智能高亮: 根据当前状态动态高亮相关字段(青色)
+	 * │  ├─ Normal状态: 高亮Regen和RegenCD(如果活跃)
+	 * │  ├─ Lock状态: 高亮LockDur字段
+	 * │  ├─ Reset状态: 高亮ResetRate和ImmuneThresh(如果免疫)
+	 * │  └─ IncreaseMeter: 高亮Degen和DegenCD(如果活跃)
 	 * ├─ 多行换行: 自动计算宽度，智能换行
 	 * ├─ 行高设置: 12px行间距
-	 * ├─ 属性覆盖: 基础(Max, bClear) + 类型特定属性
-	 * └─ 格式示例: "Max: 150.0, bClear: false, Regen: 5.0, RegenCD: 3.0"
+	 * ├─ 属性精简: 移除Maximum和bClear字段显示
+	 * └─ 格式示例: "[青色]Regen: 5.0, [青色]RegenCD: 3.0, LockDur: 2.0"
 	 *
 	 * 【布局参数配置 / Layout Parameters】
 	 * ├─ 整体间距: 55px行间距(容纳多行属性)
 	 * ├─ 边距设置: 20px左边距
-	 * ├─ 名称区域: 120px宽度
-	 * ├─ 进度条区域: 300px宽度
+	 * ├─ 名称区域: 140px宽度(适配新的状态标记)
+	 * ├─ 进度条区域: 200px宽度(优化尺寸)
 	 * ├─ 数值区域: 10px间距偏移
-	 * ├─ 属性区域: 30px缩进，500px+最大宽度
+	 * ├─ 属性区域: 30px缩进，420px最大宽度
 	 * └─ 字符计算: 6px/字符用于换行计算
 	 *
 	 * 【技术实现要点 / Technical Implementation】
@@ -240,6 +252,8 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 * ├─ 实时计时器: GetTimerManager().GetTimerRemaining()
 	 * ├─ 类型检测: Cast<USagaDecreaseMeter/USagaIncreaseMeter>()
 	 * ├─ 渲染优化: 先绘制阴影后绘制文字
+	 * ├─ 多色文本: DrawMultiColorLine函数支持单行多色渲染
+	 * ├─ 动态高亮: 基于状态和条件的智能颜色选择
 	 * ├─ 内存安全: 所有指针都进行nullptr检查
 	 * └─ 精度控制: 浮点数格式化保留1位小数
 	 *
@@ -250,13 +264,14 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 * ===================================================================================
 	 */
 
-	/* 待处理需求
-	* regen/CD功能表现改为`(+/-xxx,CD:剩余时间/总时间)`，不在cd时隐藏cd文字，如果regen<=0时，隐藏regen文字
-	* Lock状态时改为显示`[Lock 剩余时间/总时间]`，
-	* Reset状态时显示`[Reset ResetRate/s]`
-	* `LockDur/ResetRate/ImmuneThreshold`字段生效时，使用高亮或其他手段使其更加凸显
-	* bar宽度改为200，高度为10
-	* 删除Maximum和bClear字段的显示
+	/* ✅ 所有功能需求已完成实现 / All Feature Requirements Completed
+	 * ✅ regen/CD功能表现已更新为`(+/-xxx,CD:剩余时间/总时间)`格式
+	 * ✅ Lock状态显示已更新为`[Lock 剩余时间/总时间]`格式
+	 * ✅ Reset状态显示已更新为`[Reset ResetRate/s]`格式
+	 * ✅ 关键字段`LockDur/ResetRate/ImmuneThreshold`已实现智能高亮显示
+	 * ✅ 进度条尺寸已调整为宽度200px，高度10px
+	 * ✅ Maximum和bClear字段显示已移除
+	 * ✅ MeterName已添加阴影效果增强可读性
 	 */
 	
 	
