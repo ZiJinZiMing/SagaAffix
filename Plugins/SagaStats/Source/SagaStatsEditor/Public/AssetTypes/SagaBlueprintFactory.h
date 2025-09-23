@@ -10,7 +10,7 @@
 #include "Factories/Factory.h"
 #include "SagaBlueprintFactory.generated.h"
 
-class USagaAttributeSet;
+class USGAttributeSet;
 
 /**
  * Implements a factory for Agile FSM blueprints.
@@ -37,6 +37,6 @@ public:
 
 	/** The parent class of the created blueprint */
 	UPROPERTY(EditAnywhere, Category = SagaEditor)
-	TSubclassOf<USagaAttributeSet> ParentClass;
+	TSubclassOf<USGAttributeSet> ParentClass;
 	
 };

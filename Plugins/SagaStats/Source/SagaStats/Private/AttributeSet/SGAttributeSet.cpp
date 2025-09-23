@@ -4,13 +4,13 @@
 * Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
 ******************************************************************************/
 
-#include "AttributeSet/SagaAttributeSet.h"
+#include "AttributeSet/SGAttributeSet.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "SagaStatsLog.h"
 #include "GameplayEffectExtension.h"
-#include "AttributeSet/SSUtils.h"
+#include "SGUtils.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "GameFramework/PlayerController.h"
 #include "Misc/EngineVersionComparison.h"
@@ -29,14 +29,14 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 #endif
 
-#define LOCTEXT_NAMESPACE "USagaAttributeSet"
+#define LOCTEXT_NAMESPACE "USGAttributeSet"
 
-TMap<FString, FString> USagaAttributeSet::RepNotifierHandlerNames = {
+TMap<FString, FString> USGAttributeSet::RepNotifierHandlerNames = {
 	{ TEXT("FGameplayAttributeData"), TEXT("HandleRepNotifyForGameplayAttributeData") },
-	{ TEXT("FSagaClampedGameplayAttributeData"), TEXT("HandleRepNotifyForGameplayClampedAttributeData") }
+	{ TEXT("FSGClampedGameplayAttributeData"), TEXT("HandleRepNotifyForGameplayClampedAttributeData") }
 };
 
-FSagaAttributeSetExecutionData::FSagaAttributeSetExecutionData(const FGameplayEffectModCallbackData& InModCallbackData)
+FSGAttributeSetExecutionData::FSGAttributeSetExecutionData(const FGameplayEffectModCallbackData& InModCallbackData)
 {
 	Context = InModCallbackData.EffectSpec.GetContext();
 	SourceASC = Context.GetOriginalInstigatorAbilitySystemComponent();
@@ -80,7 +80,7 @@ FSagaAttributeSetExecutionData::FSagaAttributeSetExecutionData(const FGameplayEf
 	}
 }
 
-FString FSagaAttributeSetExecutionData::ToString(const FString& InSeparator) const
+FString FSGAttributeSetExecutionData::ToString(const FString& InSeparator) const
 {
 	const TArray Results = {
 		FString::Printf(TEXT("SourceActor: %s"), *GetNameSafe(SourceActor)),
@@ -97,7 +97,7 @@ FString FSagaAttributeSetExecutionData::ToString(const FString& InSeparator) con
 	return FString::Join(Results, *InSeparator);
 }
 
-float FSagaClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet) const
+float FSGClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet) const
 {
 	check(InOwnerSet);
 
@@ -107,23 +107,23 @@ float FSagaClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet)
 	return ResultValue;
 }
 
-bool FSagaClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet, float& OutValue) const
+bool FSGClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet, float& OutValue) const
 {
 	check(InOwnerSet);
 
-	if (ClampType == ESagaClampingType::None)
+	if (ClampType == ESGClampingType::None)
 	{
 		OutValue = 0.f;
 		return false;
 	}
 	
-	if (ClampType == ESagaClampingType::Float)
+	if (ClampType == ESGClampingType::Float)
 	{
 		OutValue = Value;
 		return true;
 	}
 
-	if (ClampType == ESagaClampingType::AttributeBased && Attribute.IsValid())
+	if (ClampType == ESGClampingType::AttributeBased && Attribute.IsValid())
 	{
 		// Check if valid class (eg. attribute is part of InOwnerSet and not from another set)
 		if (const FProperty* Property = Attribute.GetUProperty())
@@ -131,7 +131,7 @@ bool FSagaClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet, 
 			const UStruct* OwnerStruct = Property->GetOwnerStruct();
 			if (!InOwnerSet->GetClass()->IsChildOf(OwnerStruct))
 			{
-				SS_LOG(
+				SG_LOG(
 					Warning,
 					TEXT("FSSClampDefinition::GetValueForClamping - Unable to get attribute value for %s because it's not a member of %s"),
 					*Attribute.GetName(),
@@ -145,12 +145,12 @@ bool FSagaClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet, 
 		const FGameplayAttributeData* AttributeData = Attribute.GetGameplayAttributeData(InOwnerSet);
 		if (!AttributeData)
 		{
-			SS_LOG(
+			SG_LOG(
 				Warning,
 				TEXT("FSSClampDefinition::GetValueForClamping - Unable to get attribute value for %s because attribute failed to return its attribute data"),
 				*Attribute.GetName()
 			)
-			SS_LOG(Warning, TEXT("\t Is %s attribute a member of Attribute Set %s ?"), *Attribute.GetName(), *GetNameSafe(InOwnerSet))
+			SG_LOG(Warning, TEXT("\t Is %s attribute a member of Attribute Set %s ?"), *Attribute.GetName(), *GetNameSafe(InOwnerSet))
 			OutValue = 0.f;
 			return false;
 		}
@@ -162,25 +162,25 @@ bool FSagaClampDefinition::GetValueForClamping(const UAttributeSet* InOwnerSet, 
 	return false;
 }
 
-USagaAttributeSet::USagaAttributeSet(const FObjectInitializer& ObjectInitializer)
+USGAttributeSet::USGAttributeSet(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 
 }
 
-void USagaAttributeSet::Serialize(FArchive& Ar)
+void USGAttributeSet::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 
 	if (Ar.IsSaveGame())
 	{
-		FSSUtils::SerializeAttributeSet(this, Ar);
+		FSGUtils::SerializeAttributeSet(this, Ar);
 	}
 }
 
-void USagaAttributeSet::InitFromMetaDataTable(const UDataTable* DataTable)
+void USGAttributeSet::InitFromMetaDataTable(const UDataTable* DataTable)
 {
-	SS_NS_LOG(Verbose, TEXT("DataTable: %s"), *GetNameSafe(DataTable))
+	SG_NS_LOG(Verbose, TEXT("DataTable: %s"), *GetNameSafe(DataTable))
 	
 	// Deal with metadata table
 	InitDataTableProperties(DataTable);
@@ -194,22 +194,22 @@ void USagaAttributeSet::InitFromMetaDataTable(const UDataTable* DataTable)
 	PrintDebug();
 }
 
-bool USagaAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
+bool USGAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
 {
 	const bool bShouldExecute = Super::PreGameplayEffectExecute(Data);
-	return bShouldExecute && K2_PreGameplayEffectExecute(Data.EvaluatedData.Attribute, FSagaAttributeSetExecutionData(Data));
+	return bShouldExecute && K2_PreGameplayEffectExecute(Data.EvaluatedData.Attribute, FSGAttributeSetExecutionData(Data));
 }
 
-bool USagaAttributeSet::K2_PreGameplayEffectExecute_Implementation(const FGameplayAttribute& InAttribute, const FSagaAttributeSetExecutionData& InData)
+bool USGAttributeSet::K2_PreGameplayEffectExecute_Implementation(const FGameplayAttribute& InAttribute, const FSGAttributeSetExecutionData& InData)
 {
 	return true;
 }
 
-void USagaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+void USGAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	const FSagaAttributeSetExecutionData ExecutionData(Data);
+	const FSGAttributeSetExecutionData ExecutionData(Data);
 
 	// Call BP event if implemented
 	K2_PostGameplayEffectExecute(Data.EvaluatedData.Attribute, ExecutionData);
@@ -221,9 +221,9 @@ void USagaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	float NewValue = GetAttributeValue(Data.EvaluatedData.Attribute, bSuccessfullyFoundAttribute);
 	if (!bSuccessfullyFoundAttribute)
 	{
-		SS_LOG(
+		SG_LOG(
 			Warning,
-			TEXT("USagaAttributeSet::PostGameplayEffectExecute - Error reading %s value (clamping if any was expected couldn't be performed)"),
+			TEXT("USGAttributeSet::PostGameplayEffectExecute - Error reading %s value (clamping if any was expected couldn't be performed)"),
 			*Data.EvaluatedData.Attribute.GetName()
 		)
 		return;
@@ -236,7 +236,7 @@ void USagaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	}
 }
 
-void USagaAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& OutValue)
+void USGAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& OutValue)
 {
 	Super::PreAttributeChange(Attribute, OutValue);
 
@@ -249,13 +249,13 @@ void USagaAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 	PerformClampingForAttribute(Attribute, OutValue);
 }
 
-void USagaAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, const float OldValue, const float NewValue)
+void USGAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, const float OldValue, const float NewValue)
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 	K2_PostAttributeChange(Attribute, OldValue, NewValue);
 }
 
-void USagaAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& OutValue) const
+void USGAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& OutValue) const
 {
 	Super::PreAttributeBaseChange(Attribute, OutValue);
 
@@ -264,13 +264,13 @@ void USagaAttributeSet::PreAttributeBaseChange(const FGameplayAttribute& Attribu
 	K2_PreAttributeBaseChange(Attribute, Value, OutValue);
 }
 
-void USagaAttributeSet::PostAttributeBaseChange(const FGameplayAttribute& Attribute, const float OldValue, const float NewValue) const
+void USGAttributeSet::PostAttributeBaseChange(const FGameplayAttribute& Attribute, const float OldValue, const float NewValue) const
 {
 	Super::PostAttributeBaseChange(Attribute, OldValue, NewValue);
 	K2_PostAttributeBaseChange(Attribute, OldValue, NewValue);
 }
 
-void USagaAttributeSet::OnAttributeAggregatorCreated(const FGameplayAttribute& Attribute, FAggregator* NewAggregator) const
+void USGAttributeSet::OnAttributeAggregatorCreated(const FGameplayAttribute& Attribute, FAggregator* NewAggregator) const
 {
 	Super::OnAttributeAggregatorCreated(Attribute, NewAggregator);
 
@@ -279,12 +279,12 @@ void USagaAttributeSet::OnAttributeAggregatorCreated(const FGameplayAttribute& A
 	// to expose this event to BP
 }
 
-void USagaAttributeSet::PrintDebug()
+void USGAttributeSet::PrintDebug()
 {
 	Super::PrintDebug();
 }
 
-bool USagaAttributeSet::PerformClampingForAttribute(const FGameplayAttribute& InAttribute, float& OutValue) const
+bool USGAttributeSet::PerformClampingForAttribute(const FGameplayAttribute& InAttribute, float& OutValue) const
 {
 	float NewValue = OutValue;
 	bool bWasClamped = false;
@@ -311,15 +311,15 @@ bool USagaAttributeSet::PerformClampingForAttribute(const FGameplayAttribute& In
 	return bWasClamped;
 }
 
-void USagaAttributeSet::ClampAttributeValue(const FGameplayAttribute Attribute, const float MinValue, const float MaxValue)
+void USGAttributeSet::ClampAttributeValue(const FGameplayAttribute Attribute, const float MinValue, const float MaxValue)
 {
 	bool bSuccessfullyFoundAttribute = true;
 	const float CurrentValue = GetAttributeValue(Attribute, bSuccessfullyFoundAttribute);
 	if (!bSuccessfullyFoundAttribute)
 	{
-		SS_LOG(
+		SG_LOG(
 			Warning,
-			TEXT("USagaAttributeSet::ClampAttributeValue - Error reading %s value (clamping couldn't be performed)"),
+			TEXT("USGAttributeSet::ClampAttributeValue - Error reading %s value (clamping couldn't be performed)"),
 			*Attribute.GetName()
 		)
 		return;
@@ -327,7 +327,7 @@ void USagaAttributeSet::ClampAttributeValue(const FGameplayAttribute Attribute, 
 	
 	const float NewValue = FMath::Clamp(CurrentValue, MinValue, MaxValue);
 
-	SS_NS_LOG(
+	SG_NS_LOG(
 		Verbose,
 		TEXT("Clamping attribute %s value to %f (was %f) from Min: %f - Max: %f"),
 		*Attribute.GetName(),
@@ -340,17 +340,17 @@ void USagaAttributeSet::ClampAttributeValue(const FGameplayAttribute Attribute, 
 	SetAttributeValue(Attribute, NewValue);
 }
 
-float USagaAttributeSet::K2_GetAttributeValue(FGameplayAttribute Attribute, bool& bSuccessfullyFoundAttribute) const
+float USGAttributeSet::K2_GetAttributeValue(FGameplayAttribute Attribute, bool& bSuccessfullyFoundAttribute) const
 {
 	return GetAttributeValue(Attribute, bSuccessfullyFoundAttribute);
 }
 
-float USagaAttributeSet::GetAttributeValue(const FGameplayAttribute& Attribute, bool& bSuccessfullyFoundAttribute) const
+float USGAttributeSet::GetAttributeValue(const FGameplayAttribute& Attribute, bool& bSuccessfullyFoundAttribute) const
 {
 	const UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
 	if (!ASC)
 	{
-		SS_LOG(Warning, TEXT("USagaAttributeSet::GetAttributeValue - Unable to get attribute value for %s because ASC is invalid"), *Attribute.GetName())
+		SG_LOG(Warning, TEXT("USGAttributeSet::GetAttributeValue - Unable to get attribute value for %s because ASC is invalid"), *Attribute.GetName())
 		bSuccessfullyFoundAttribute = false;
 		return 0.f;
 	}
@@ -358,17 +358,17 @@ float USagaAttributeSet::GetAttributeValue(const FGameplayAttribute& Attribute, 
 	return UAbilitySystemBlueprintLibrary::GetFloatAttributeFromAbilitySystemComponent(ASC, Attribute, bSuccessfullyFoundAttribute);
 }
 
-float USagaAttributeSet::K2_GetAttributeBaseValue(FGameplayAttribute Attribute, bool& bSuccessfullyFoundAttribute) const
+float USGAttributeSet::K2_GetAttributeBaseValue(FGameplayAttribute Attribute, bool& bSuccessfullyFoundAttribute) const
 {
 	return GetAttributeBaseValue(Attribute, bSuccessfullyFoundAttribute);
 }
 
-float USagaAttributeSet::GetAttributeBaseValue(const FGameplayAttribute& Attribute, bool& bSuccessfullyFoundAttribute) const
+float USGAttributeSet::GetAttributeBaseValue(const FGameplayAttribute& Attribute, bool& bSuccessfullyFoundAttribute) const
 {
 	const UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
 	if (!ASC)
 	{
-		SS_LOG(Warning, TEXT("USagaAttributeSet::GetAttributeBaseValue - Unable to get attribute value for %s because ASC is invalid"), *Attribute.GetName())
+		SG_LOG(Warning, TEXT("USGAttributeSet::GetAttributeBaseValue - Unable to get attribute value for %s because ASC is invalid"), *Attribute.GetName())
 		bSuccessfullyFoundAttribute = false;
 		return 0.f;
 	}
@@ -377,29 +377,29 @@ float USagaAttributeSet::GetAttributeBaseValue(const FGameplayAttribute& Attribu
 }
 
 // ReSharper disable once CppUE4BlueprintCallableFunctionMayBeConst
-void USagaAttributeSet::K2_SetAttributeValue(const FGameplayAttribute Attribute, const float NewValue)
+void USGAttributeSet::K2_SetAttributeValue(const FGameplayAttribute Attribute, const float NewValue)
 {
 	SetAttributeValue(Attribute, NewValue);
 }
 
-void USagaAttributeSet::SetAttributeValue(const FGameplayAttribute& Attribute, const float NewValue) const
+void USGAttributeSet::SetAttributeValue(const FGameplayAttribute& Attribute, const float NewValue) const
 {
 	UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
 	if (!ASC)
 	{
-		SS_LOG(Warning, TEXT("USagaAttributeSet::SetAttributeValue - Unable to set value for %s because ASC is invalid"), *Attribute.GetName())
+		SG_LOG(Warning, TEXT("USGAttributeSet::SetAttributeValue - Unable to set value for %s because ASC is invalid"), *Attribute.GetName())
 		return;
 	}
 
 	ASC->SetNumericAttributeBase(Attribute, NewValue);
 }
 
-bool USagaAttributeSet::IsGameplayAttributeDataClampedProperty(const FProperty* Property)
+bool USGAttributeSet::IsGameplayAttributeDataClampedProperty(const FProperty* Property)
 {
 	if (const FStructProperty* StructProp = CastField<FStructProperty>(Property))
 	{
 		const UStruct* Struct = StructProp->Struct;
-		if (Struct && Struct->IsChildOf(FSagaClampedGameplayAttributeData::StaticStruct()))
+		if (Struct && Struct->IsChildOf(FSGClampedGameplayAttributeData::StaticStruct()))
 		{
 			return true;
 		}
@@ -408,37 +408,37 @@ bool USagaAttributeSet::IsGameplayAttributeDataClampedProperty(const FProperty* 
 	return false;
 }
 
-AActor* USagaAttributeSet::K2_GetOwningActor() const
+AActor* USGAttributeSet::K2_GetOwningActor() const
 {
 	return GetOwningActor();
 }
 
-UAbilitySystemComponent* USagaAttributeSet::K2_GetOwningAbilitySystemComponent() const
+UAbilitySystemComponent* USGAttributeSet::K2_GetOwningAbilitySystemComponent() const
 {
 	return GetOwningAbilitySystemComponent();
 }
 
-FGameplayAbilityActorInfo USagaAttributeSet::K2_GetActorInfo() const
+FGameplayAbilityActorInfo USGAttributeSet::K2_GetActorInfo() const
 {
 	FGameplayAbilityActorInfo* ActorInfo = GetActorInfo();
 	if (!ActorInfo)
 	{
-		SS_LOG(Error, TEXT("USagaAttributeSet::K2_GetActorInfo - Unable to get actor info pointer"))
+		SG_LOG(Error, TEXT("USGAttributeSet::K2_GetActorInfo - Unable to get actor info pointer"))
 		return FGameplayAbilityActorInfo();
 	}
 
 	return *ActorInfo;
 }
 
-void USagaAttributeSet::HandleRepNotifyForGameplayAttribute(const FName InPropertyName)
+void USGAttributeSet::HandleRepNotifyForGameplayAttribute(const FName InPropertyName)
 {
 	FProperty* ThisProperty = FindFProperty<FProperty>(GetClass(), InPropertyName);
 	
 	if (!ThisProperty)
 	{
-		SS_LOG(
+		SG_LOG(
 			Warning,
-			TEXT("USagaAttributeSet::HandleRepNotifyForGameplayAttribute - Invalid InPropertyName (%s) - could not find in %s"),
+			TEXT("USGAttributeSet::HandleRepNotifyForGameplayAttribute - Invalid InPropertyName (%s) - could not find in %s"),
 			*InPropertyName.ToString(),
 			*GetNameSafe(GetClass())
 		)
@@ -451,7 +451,7 @@ void USagaAttributeSet::HandleRepNotifyForGameplayAttribute(const FName InProper
 		const FString ErrorMessage = FString::Printf(TEXT("Was unable to determine current attribute data for property: %s"), *InPropertyName.ToString());
 		if (!ensureMsgf(AttributeData, TEXT("%s"), *ErrorMessage))
 		{
-			SS_LOG(Error, TEXT("USagaAttributeSet::HandleRepNotifyForGameplayAttribute - %s"), *ErrorMessage)
+			SG_LOG(Error, TEXT("USGAttributeSet::HandleRepNotifyForGameplayAttribute - %s"), *ErrorMessage)
 			return;
 		}
 	}
@@ -464,7 +464,7 @@ void USagaAttributeSet::HandleRepNotifyForGameplayAttribute(const FName InProper
 		const FString ErrorMessage = FString::Printf(TEXT("Was unable to determine old attribute data for property: %s"), *InPropertyName.ToString());
 		if (!ensureMsgf(OldAttributeDataPtr, TEXT("%s"), *ErrorMessage))
 		{
-			SS_LOG(Error, TEXT("USagaAttributeSet::HandleRepNotifyForGameplayAttribute - %s"), *ErrorMessage)
+			SG_LOG(Error, TEXT("USGAttributeSet::HandleRepNotifyForGameplayAttribute - %s"), *ErrorMessage)
 		}
 	}
 
@@ -472,7 +472,7 @@ void USagaAttributeSet::HandleRepNotifyForGameplayAttribute(const FName InProper
 	GetOwningAbilitySystemComponent()->SetBaseAttributeValueFromReplication(Attribute, *AttributeData, OldAttributeData);
 }
 
-void USagaAttributeSet::HandleRepNotifyForGameplayAttributeData(const FGameplayAttributeData& InAttribute)
+void USGAttributeSet::HandleRepNotifyForGameplayAttributeData(const FGameplayAttributeData& InAttribute)
 {
 	FString AttributeName;
 	if (!GetAttributeDataPropertyName(InAttribute, AttributeName))
@@ -486,26 +486,26 @@ void USagaAttributeSet::HandleRepNotifyForGameplayAttributeData(const FGameplayA
 		);
 		
 		ensureMsgf(false, TEXT("%s"), *ErrorMessage);
-		SS_NS_LOG(Warning, TEXT("%s"), *ErrorMessage);
+		SG_NS_LOG(Warning, TEXT("%s"), *ErrorMessage);
 		return;
 	}
 
 	HandleRepNotifyForGameplayAttribute(FName(*AttributeName));
 }
 
-void USagaAttributeSet::HandleRepNotifyForGameplayClampedAttributeData(const FSagaClampedGameplayAttributeData& InAttribute)
+void USGAttributeSet::HandleRepNotifyForGameplayClampedAttributeData(const FSGClampedGameplayAttributeData& InAttribute)
 {
 	HandleRepNotifyForGameplayAttributeData(InAttribute);
 }
 
-void USagaAttributeSet::BeginDestroy()
+void USGAttributeSet::BeginDestroy()
 {
 	AttributesMetaData.Empty();
 	AttributeDataRepMap.Empty();
 	Super::BeginDestroy();
 }
 
-void USagaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void USGAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
@@ -516,7 +516,7 @@ void USagaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	}
 }
 
-void USagaAttributeSet::PreNetReceive()
+void USGAttributeSet::PreNetReceive()
 {
 	Super::PreNetReceive();
 	
@@ -533,7 +533,7 @@ void USagaAttributeSet::PreNetReceive()
 	AttributeDataRepMap.Reset();
 	AttributeDataRepMap.Reserve(ReplicatedProps.Num());
 
-	SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::PreNetReceive ... ReplicatedProps: %d"), ReplicatedProps.Num())
+	SG_LOG(VeryVerbose, TEXT("USGAttributeSet::PreNetReceive ... ReplicatedProps: %d"), ReplicatedProps.Num())
 	for (FProperty* Prop : ReplicatedProps)
 	{
 		if (!Prop || !Prop->GetOwnerClass())
@@ -548,10 +548,10 @@ void USagaAttributeSet::PreNetReceive()
 			continue;
 		}
 		
-		SS_LOG(VeryVerbose, TEXT("\t Prop: %s (Owner: %s) - Value: %f"), *GetNameSafe(Prop), *GetNameSafe(Prop->GetOwnerClass()), AttributeData->GetCurrentValue())
+		SG_LOG(VeryVerbose, TEXT("\t Prop: %s (Owner: %s) - Value: %f"), *GetNameSafe(Prop), *GetNameSafe(Prop->GetOwnerClass()), AttributeData->GetCurrentValue())
 		if (const UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
 		{
-			SS_LOG(VeryVerbose, TEXT("\t\t Prop: %s (Owner: %s) - ASC Value: %f"), *GetNameSafe(Prop), *GetNameSafe(Prop->GetOwnerClass()), ASC->GetNumericAttribute(Attribute))
+			SG_LOG(VeryVerbose, TEXT("\t\t Prop: %s (Owner: %s) - ASC Value: %f"), *GetNameSafe(Prop), *GetNameSafe(Prop->GetOwnerClass()), ASC->GetNumericAttribute(Attribute))
 		}
 
 		FString Key = FString::Printf(TEXT("%s.%s"), *Prop->GetOwnerClass()->GetName(), *Prop->GetName());
@@ -563,7 +563,7 @@ void USagaAttributeSet::PreNetReceive()
 
 #if UE_VERSION_NEWER_THAN(5, 3, -1)
 
-EDataValidationResult USagaAttributeSet::IsDataValid(FDataValidationContext& Context) const
+EDataValidationResult USGAttributeSet::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
@@ -595,7 +595,7 @@ EDataValidationResult USagaAttributeSet::IsDataValid(FDataValidationContext& Con
 
 #else
 
-EDataValidationResult USagaAttributeSet::IsDataValid(TArray<FText>& ValidationErrors)
+EDataValidationResult USGAttributeSet::IsDataValid(TArray<FText>& ValidationErrors)
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(ValidationErrors), EDataValidationResult::Valid);
 	Result = CombineDataValidationResults(Result, IsDataValidBlueprintEditor(ValidationErrors));
@@ -605,7 +605,7 @@ EDataValidationResult USagaAttributeSet::IsDataValid(TArray<FText>& ValidationEr
 
 #endif
 
-EDataValidationResult USagaAttributeSet::IsDataValidBlueprintEditor(TArray<FText>& ValidationErrors) const
+EDataValidationResult USGAttributeSet::IsDataValidBlueprintEditor(TArray<FText>& ValidationErrors) const
 {
 	EDataValidationResult Result = EDataValidationResult::NotValidated;
 	
@@ -634,8 +634,8 @@ EDataValidationResult USagaAttributeSet::IsDataValidBlueprintEditor(TArray<FText
 	}
 
 	const FString EditorName = EditorInstance->GetEditorName().ToString();
-	SS_LOG(Verbose, TEXT("USagaAttributeSet::IsDataValid TestObject: %s"), *GetNameSafe(TestObject))
-	SS_LOG(Verbose, TEXT("USagaAttributeSet::IsDataValid EditorName: %s"), *EditorName)
+	SG_LOG(Verbose, TEXT("USGAttributeSet::IsDataValid TestObject: %s"), *GetNameSafe(TestObject))
+	SG_LOG(Verbose, TEXT("USGAttributeSet::IsDataValid EditorName: %s"), *EditorName)
 
 	
 	// TODO: Have FSSBlueprintEditor::GetToolkitFName use a constant defined somewhere
@@ -662,17 +662,17 @@ EDataValidationResult USagaAttributeSet::IsDataValidBlueprintEditor(TArray<FText
 	return Result;
 }
 
-EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& ValidationErrors) const
+EDataValidationResult USGAttributeSet::IsDataValidRepNotifies(TArray<FText>& ValidationErrors) const
 {
 	EDataValidationResult Result = EDataValidationResult::NotValidated;
 
 	TArray<FProperty*> ReplicatedProperties;
 	GetAllBlueprintReplicatedProps(ReplicatedProperties);
 
-	SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::IsDataValidRepNotifies - Check for rep notifies validity ..."))
+	SG_LOG(VeryVerbose, TEXT("USGAttributeSet::IsDataValidRepNotifies - Check for rep notifies validity ..."))
 	
 	const UBlueprint* Blueprint = UBlueprint::GetBlueprintFromClass(GetClass());
-	SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::IsDataValidRepNotifies - Blueprint: %s"), *GetNameSafe(Blueprint))
+	SG_LOG(VeryVerbose, TEXT("USGAttributeSet::IsDataValidRepNotifies - Blueprint: %s"), *GetNameSafe(Blueprint))
 	if (!Blueprint)
 	{
 		return Result;
@@ -681,7 +681,7 @@ EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& V
 	TArray<FProperty*> RepNotifiedProperties;
 	
 	// First pass, check all replicated props are using RepNotify
-	SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::IsDataValidRepNotifies - ReplicatedProperties: %d"), ReplicatedProperties.Num())
+	SG_LOG(VeryVerbose, TEXT("USGAttributeSet::IsDataValidRepNotifies - ReplicatedProperties: %d"), ReplicatedProperties.Num())
 	for (FProperty* Property : ReplicatedProperties)
 	{
 		if (!Property)
@@ -690,7 +690,7 @@ EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& V
 		}
 		
 		const bool bIsRepNotified = Property->HasAllPropertyFlags(CPF_RepNotify);
-		SS_LOG(VeryVerbose, TEXT("\t Property: %s (bIsRepNotified: %s)"), *GetNameSafe(Property), bIsRepNotified ? TEXT("true") : TEXT("false"))
+		SG_LOG(VeryVerbose, TEXT("\t Property: %s (bIsRepNotified: %s)"), *GetNameSafe(Property), bIsRepNotified ? TEXT("true") : TEXT("false"))
 		if (!bIsRepNotified)
 		{
 			Result = EDataValidationResult::Invalid;
@@ -719,7 +719,7 @@ EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& V
 			continue;
 		}
 
-		SS_LOG(
+		SG_LOG(
 			VeryVerbose,
 			TEXT("\t Property: %s, PropertyClass: %s, OwnerClass: %s, BlueprintOwner: %s"),
 			*GetNameSafe(Property),
@@ -765,7 +765,7 @@ EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& V
 			TArray<UK2Node_CallFunction*> FunctionNodes;
 			NotifyGraph->GetNodesOfClass(FunctionNodes);
 			
-			SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::IsDataValidRepNotifies - FunctionNodes: %d (Graph: %s, Property: %s)"), FunctionNodes.Num(), *NotifyGraph->GetName(), *Property->GetName())
+			SG_LOG(VeryVerbose, TEXT("USGAttributeSet::IsDataValidRepNotifies - FunctionNodes: %d (Graph: %s, Property: %s)"), FunctionNodes.Num(), *NotifyGraph->GetName(), *Property->GetName())
 
 			TArray<UK2Node_CallFunction*> HandleFunctions = FunctionNodes.FilterByPredicate([RepNotifyHandlerFunctionName](const UK2Node_CallFunction* Function)
 			{
@@ -782,7 +782,7 @@ EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& V
 					FText::FromString(RepNotifyHandlerFunctionName)
 				));
 
-				// SS_NS_LOG(Warning, TEXT("Must be one of: %s"), *FString::Join(RepNotifierHandlerNames, TEXT(", ")))
+				// SG_NS_LOG(Warning, TEXT("Must be one of: %s"), *FString::Join(RepNotifierHandlerNames, TEXT(", ")))
 				continue;
 			}
 
@@ -821,7 +821,7 @@ EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& V
 							));
 						}
 						
-						SS_LOG(VeryVerbose, TEXT("MemberName: %s, LinkedTo: %s, OwningNode: %s, InputPin: %s"), *MemberName, *LinkedTo->GetName(), *GetNameSafe(VarNode), *Pin->GetName())
+						SG_LOG(VeryVerbose, TEXT("MemberName: %s, LinkedTo: %s, OwningNode: %s, InputPin: %s"), *MemberName, *LinkedTo->GetName(), *GetNameSafe(VarNode), *Pin->GetName())
 					}
 				}
 			}
@@ -831,7 +831,7 @@ EDataValidationResult USagaAttributeSet::IsDataValidRepNotifies(TArray<FText>& V
 	return Result;
 }
 
-bool USagaAttributeSet::IsNodeWiredToEntry(const UK2Node* InNode)
+bool USGAttributeSet::IsNodeWiredToEntry(const UK2Node* InNode)
 {
 	if (!InNode)
 	{
@@ -859,13 +859,13 @@ bool USagaAttributeSet::IsNodeWiredToEntry(const UK2Node* InNode)
 
 		UEdGraphNode* OwningNode = LinkedTo->GetOwningNode();
 		bHasPinWiredToEntry |= IsNodeWiredToEntry(Cast<UK2Node>(OwningNode));
-		SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::IsNodeWiredToEntry - LinkedTo: %s, OwningNode: %s, InputPin: %s"), *LinkedTo->GetName(), *GetNameSafe(OwningNode), *InputPin->GetName())
+		SG_LOG(VeryVerbose, TEXT("USGAttributeSet::IsNodeWiredToEntry - LinkedTo: %s, OwningNode: %s, InputPin: %s"), *LinkedTo->GetName(), *GetNameSafe(OwningNode), *InputPin->GetName())
 	}
 
 	return bHasPinWiredToEntry;
 }
 
-UEdGraphPin* USagaAttributeSet::FindGraphNodePin(const UEdGraphNode* InNode, const EEdGraphPinDirection InDirection)
+UEdGraphPin* USGAttributeSet::FindGraphNodePin(const UEdGraphNode* InNode, const EEdGraphPinDirection InDirection)
 {
 	UEdGraphPin* Pin = nullptr;
 	for (int32 Idx = 0; Idx < InNode->Pins.Num(); Idx++)
@@ -881,12 +881,12 @@ UEdGraphPin* USagaAttributeSet::FindGraphNodePin(const UEdGraphNode* InNode, con
 }
 #endif
 
-TMap<FString, TSharedPtr<FAttributeMetaData>> USagaAttributeSet::GetAttributesMetaData() const
+TMap<FString, TSharedPtr<FAttributeMetaData>> USGAttributeSet::GetAttributesMetaData() const
 {
 	return AttributesMetaData;
 }
 
-void USagaAttributeSet::InitClampedAttributeDataProperties()
+void USGAttributeSet::InitClampedAttributeDataProperties()
 {
 	for (TFieldIterator<FProperty> It(GetClass(), EFieldIteratorFlags::IncludeSuper); It; ++It)
 	{
@@ -909,17 +909,17 @@ void USagaAttributeSet::InitClampedAttributeDataProperties()
 	}
 }
 
-void USagaAttributeSet::InitDataTableProperties(const UDataTable* DataTable)
+void USGAttributeSet::InitDataTableProperties(const UDataTable* DataTable)
 {
 	if (!DataTable)
 	{
-		SS_NS_LOG(Error, TEXT("Error with datatable initialization. Datatable is invalid."))
+		SG_NS_LOG(Error, TEXT("Error with datatable initialization. Datatable is invalid."))
 		return;
 	}
 
-	static const FString Context = FString(TEXT("USagaAttributeSet::BindToMetaDataTable"));
+	static const FString Context = FString(TEXT("USGAttributeSet::BindToMetaDataTable"));
 
-	const FString AttributeSetName = FSSUtils::GetAttributeClassName(GetNameSafe(GetClass()));
+	const FString AttributeSetName = FSGUtils::GetAttributeClassName(GetNameSafe(GetClass()));
 	for (TFieldIterator<FProperty> It(GetClass(), EFieldIteratorFlags::IncludeSuper); It; ++It)
 	{
 		FProperty* Property = *It;
@@ -965,13 +965,13 @@ void USagaAttributeSet::InitDataTableProperties(const UDataTable* DataTable)
 	}
 }
 
-bool USagaAttributeSet::IsValidClampedProperty(const FGameplayAttribute& Attribute) const
+bool USGAttributeSet::IsValidClampedProperty(const FGameplayAttribute& Attribute) const
 {
 	if (IsGameplayAttributeDataClampedProperty(Attribute.GetUProperty()))
 	{
-		// const FSagaClampedGameplayAttributeData* Clamped = static_cast<FSagaClampedGameplayAttributeData*>(Attribute.GetGameplayAttributeData(this));
-		const FSagaClampedGameplayAttributeData* Clamped = static_cast<const FSagaClampedGameplayAttributeData*>(Attribute.GetGameplayAttributeData(this));
-		// Valid whenever we are sure it is a FSagaClampedGameplayAttributeData
+		// const FSGClampedGameplayAttributeData* Clamped = static_cast<FSGClampedGameplayAttributeData*>(Attribute.GetGameplayAttributeData(this));
+		const FSGClampedGameplayAttributeData* Clamped = static_cast<const FSGClampedGameplayAttributeData*>(Attribute.GetGameplayAttributeData(this));
+		// Valid whenever we are sure it is a FSGClampedGameplayAttributeData
 		// We'll handle invalidity of lower / max bounds in GetClampedValueForClampedProperty
 		return Clamped != nullptr;
 	}
@@ -979,13 +979,13 @@ bool USagaAttributeSet::IsValidClampedProperty(const FGameplayAttribute& Attribu
 	return false;
 }
 
-float USagaAttributeSet::GetClampedValueForClampedProperty(const FGameplayAttribute& Attribute, const float InValue) const
+float USGAttributeSet::GetClampedValueForClampedProperty(const FGameplayAttribute& Attribute, const float InValue) const
 {
 	float NewValue = InValue;
 
 	if (IsGameplayAttributeDataClampedProperty(Attribute.GetUProperty()))
 	{
-		if (const FSagaClampedGameplayAttributeData* Clamped = static_cast<const FSagaClampedGameplayAttributeData*>(Attribute.GetGameplayAttributeData(this)))
+		if (const FSGClampedGameplayAttributeData* Clamped = static_cast<const FSGClampedGameplayAttributeData*>(Attribute.GetGameplayAttributeData(this)))
 		{
 			float MinValue;
 			const bool bIsMinValid = Clamped->MinValue.GetValueForClamping(this, MinValue);
@@ -996,26 +996,26 @@ float USagaAttributeSet::GetClampedValueForClampedProperty(const FGameplayAttrib
 			// If both min / max are valid, usual clamp
 			if (bIsMinValid && bIsMaxValid)
 			{
-				// SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::GetClampedValueForClampedProperty - Clamp %f between %f and %f"), NewValue, MinValue, MaxValue);
+				// SG_LOG(VeryVerbose, TEXT("USGAttributeSet::GetClampedValueForClampedProperty - Clamp %f between %f and %f"), NewValue, MinValue, MaxValue);
 				NewValue = FMath::Clamp(NewValue, MinValue, MaxValue);
 			}
 			// If only min is valid, then clamp using the lower bound only
 			else if (bIsMinValid)
 			{
-				// SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::GetClampedValueForClampedProperty - Clamp %f using only min %f (max invalid)"), NewValue, MinValue);
+				// SG_LOG(VeryVerbose, TEXT("USGAttributeSet::GetClampedValueForClampedProperty - Clamp %f using only min %f (max invalid)"), NewValue, MinValue);
 				NewValue = FMath::Max(NewValue, MinValue);
 			}
 			// If only max is valid, then clamp using the higher bound only
 			else if (bIsMaxValid)
 			{
-				// SS_LOG(VeryVerbose, TEXT("USagaAttributeSet::GetClampedValueForClampedProperty - Clamp %f using only max %f (min invalid)"), NewValue, MaxValue);
+				// SG_LOG(VeryVerbose, TEXT("USGAttributeSet::GetClampedValueForClampedProperty - Clamp %f using only max %f (min invalid)"), NewValue, MaxValue);
 				NewValue = FMath::Min(NewValue, MaxValue);
 			}
 			else
 			{
-				SS_LOG(
+				SG_LOG(
 					Warning,
-					TEXT("USagaAttributeSet::GetClampedValueForClampedProperty - "
+					TEXT("USGAttributeSet::GetClampedValueForClampedProperty - "
 					"Clamping for Gameplay Clamped Attribute %s was disabled because Min and Max values are incorrrect"
 					"(Min: %s, Max: %s)"),
 					*Attribute.GetName(),
@@ -1029,12 +1029,12 @@ float USagaAttributeSet::GetClampedValueForClampedProperty(const FGameplayAttrib
 	return NewValue;
 }
 
-bool USagaAttributeSet::IsValidAttributeMetadata(const FAttributeMetaData& InAttributeMetadata)
+bool USGAttributeSet::IsValidAttributeMetadata(const FAttributeMetaData& InAttributeMetadata)
 {
 	return InAttributeMetadata.MinValue < InAttributeMetadata.MaxValue;
 }
 
-bool USagaAttributeSet::IsValidAttributeMetadata(const TSharedPtr<FAttributeMetaData>& InAttributeMetadata)
+bool USGAttributeSet::IsValidAttributeMetadata(const TSharedPtr<FAttributeMetaData>& InAttributeMetadata)
 {
 	
 	/* todo：不使用MetaTable中的Clamp功能
@@ -1049,7 +1049,7 @@ bool USagaAttributeSet::IsValidAttributeMetadata(const TSharedPtr<FAttributeMeta
 	return false;
 }
 
-bool USagaAttributeSet::HasClampedMetaData(const FGameplayAttribute& Attribute) const
+bool USGAttributeSet::HasClampedMetaData(const FGameplayAttribute& Attribute) const
 {
 	
 	/* todo：不使用MetaTable中的Clamp功能
@@ -1063,7 +1063,7 @@ bool USagaAttributeSet::HasClampedMetaData(const FGameplayAttribute& Attribute) 
 	return false;
 }
 
-float USagaAttributeSet::GetClampedValueForMetaData(const FGameplayAttribute& Attribute, const float InValue) const
+float USGAttributeSet::GetClampedValueForMetaData(const FGameplayAttribute& Attribute, const float InValue) const
 {
 	float NewValue = InValue;
 	const FString AttributeName = Attribute.GetName();
@@ -1081,9 +1081,9 @@ float USagaAttributeSet::GetClampedValueForMetaData(const FGameplayAttribute& At
 			{
 				// This is technically not an error / warning, because DataTables min / max values are usually not handled and have no effect
 				// Using verbose lvl here to prevent flooding the output log in the likely cases of rows with Min / Max columns not used (being 0.f)
-				SS_LOG(
+				SG_LOG(
 					Verbose,
-					TEXT("USagaAttributeSet::GetClampedValueForMetaData - "
+					TEXT("USGAttributeSet::GetClampedValueForMetaData - "
 					"Clamping from MetaData table for Attribute %s was disabled because Min and Max values are incorrrect "
 					"(Min must be lower than Max - Min: %f, Max: %f)"),
 					*AttributeName,
@@ -1097,12 +1097,12 @@ float USagaAttributeSet::GetClampedValueForMetaData(const FGameplayAttribute& At
 	return NewValue;
 }
 
-void USagaAttributeSet::GetAllBlueprintReplicatedProps(TArray<FProperty*>& OutProperties, const EPropertyFlags InCheckFlag) const
+void USGAttributeSet::GetAllBlueprintReplicatedProps(TArray<FProperty*>& OutProperties, const EPropertyFlags InCheckFlag) const
 {
 	GetAllBlueprintReplicatedProps(GetClass(), OutProperties, InCheckFlag);
 }
 
-void USagaAttributeSet::GetAllBlueprintReplicatedProps(UClass* InClass, TArray<FProperty*>& OutProperties, const EPropertyFlags InCheckFlag) const
+void USGAttributeSet::GetAllBlueprintReplicatedProps(UClass* InClass, TArray<FProperty*>& OutProperties, const EPropertyFlags InCheckFlag) const
 {
 	const UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(InClass);
 	if (!BPClass)
@@ -1115,7 +1115,7 @@ void USagaAttributeSet::GetAllBlueprintReplicatedProps(UClass* InClass, TArray<F
 	for (TFieldIterator<FProperty> It(BPClass, EFieldIteratorFlags::ExcludeSuper); It && PropertiesLeft > 0; ++It)
 	{
 		FProperty* Prop = *It;
-		if (!Prop || !FSSUtils::IsValidCPPType(Prop->GetCPPType()))
+		if (!Prop || !FSGUtils::IsValidCPPType(Prop->GetCPPType()))
 		{
 			continue;
 		}
@@ -1134,7 +1134,7 @@ void USagaAttributeSet::GetAllBlueprintReplicatedProps(UClass* InClass, TArray<F
 	}
 }
 
-bool USagaAttributeSet::GetAttributeDataPropertyName(const FGameplayAttributeData& InAttributeData, FString& OutPropertyName)
+bool USGAttributeSet::GetAttributeDataPropertyName(const FGameplayAttributeData& InAttributeData, FString& OutPropertyName)
 {
 	const UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
 	if (!BPClass)
@@ -1172,7 +1172,7 @@ bool USagaAttributeSet::GetAttributeDataPropertyName(const FGameplayAttributeDat
 				if (DataPtr == &InAttributeData)
 				{
 					FString AuthoredName = Prop->GetAuthoredName();
-					SS_LOG(Verbose, TEXT("\t\t Found matching property for AuthoredName: %s"), *AuthoredName)
+					SG_LOG(Verbose, TEXT("\t\t Found matching property for AuthoredName: %s"), *AuthoredName)
 					OutPropertyName = MoveTemp(AuthoredName);
 					return true;
 				}

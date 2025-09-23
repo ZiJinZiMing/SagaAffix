@@ -14,11 +14,11 @@ class UAttributeSet;
 struct FGameplayAttributeData;
 
 /**
- * Details customization for FGameplayAttributeData / FSagaClampedGameplayAttributeData (Base Class).
+ * Details customization for FGameplayAttributeData / FSGClampedGameplayAttributeData (Base Class).
  *
  * And ability to view / set BaseValue and CurrentValue (as DefaultValue)
  *
- * This is the default Base class shared by both FGameplayAttributeData and FSagaClampedGameplayAttributeData details customization classes.
+ * This is the default Base class shared by both FGameplayAttributeData and FSGClampedGameplayAttributeData details customization classes.
  */
 class ISagaGameplayAttributeDataDetailsBase : public IPropertyTypeCustomization
 {

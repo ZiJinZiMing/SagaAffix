@@ -7,10 +7,10 @@
 
 #include "Meter/Async/AbilityAsync_WaitMeterStateChange.h"
 
-#include "SagaAbilitySystemComponent.h"
-#include "Meter/SagaDecreaseMeter.h"
+#include "SGAbilitySystemComponent.h"
+#include "Meter/DecreaseMeter.h"
 
-UAbilityAsync_WaitMeterStateChange* UAbilityAsync_WaitMeterStateChange::WaitMeterStateChange(AActor* TargetActor, TSubclassOf<USagaDecreaseMeter> MeterClass)
+UAbilityAsync_WaitMeterStateChange* UAbilityAsync_WaitMeterStateChange::WaitMeterStateChange(AActor* TargetActor, TSubclassOf<UDecreaseMeter> MeterClass)
 {
 	UAbilityAsync_WaitMeterStateChange* Async = NewObject<UAbilityAsync_WaitMeterStateChange>();
 	Async->SetAbilityActor(TargetActor);
@@ -21,7 +21,7 @@ UAbilityAsync_WaitMeterStateChange* UAbilityAsync_WaitMeterStateChange::WaitMete
 void UAbilityAsync_WaitMeterStateChange::Activate()
 {
 	Super::Activate();
-	if (USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponent()))
+	if (USGAbilitySystemComponent* ASC = Cast<USGAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		MeterStateChangeHandle = ASC->GetMeterStateChangeDelegate(MeterClass).AddUObject(this, &ThisClass::OnMeterStateChangeCallback);
 	}
@@ -33,14 +33,14 @@ void UAbilityAsync_WaitMeterStateChange::Activate()
 
 void UAbilityAsync_WaitMeterStateChange::EndAction()
 {
-	if (USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponent()))
+	if (USGAbilitySystemComponent* ASC = Cast<USGAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		ASC->GetMeterStateChangeDelegate(MeterClass).Remove(MeterStateChangeHandle);
 	}
 	Super::EndAction();
 }
 
-void UAbilityAsync_WaitMeterStateChange::OnMeterStateChangeCallback(USagaDecreaseMeter* Meter, EMeterState OldState)
+void UAbilityAsync_WaitMeterStateChange::OnMeterStateChangeCallback(UDecreaseMeter* Meter, EMeterState OldState)
 {
 	OnStateChange.Broadcast(Meter, Meter->MeterState, OldState);
 }

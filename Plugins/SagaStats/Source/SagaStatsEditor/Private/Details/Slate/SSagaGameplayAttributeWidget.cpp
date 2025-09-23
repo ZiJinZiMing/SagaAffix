@@ -10,8 +10,8 @@
 #include "SSEditorLog.h"
 #include "SlateOptMacros.h"
 #include "SagaStatsEditor.h"
-#include "AttributeSet/SagaAttributeSetBlueprint.h"
-#include "AttributeSet/SSUtils.h"
+#include "SGUtils.h"
+#include "AttributeSet/SGAttributeSetBlueprint.h"
 #include "Misc/TextFilter.h"
 #include "UObject/PropertyAccessUtil.h"
 #include "UObject/UObjectIterator.h"
@@ -214,7 +214,7 @@ void SSSGameplayAttributeListWidget::Construct(const FArguments& InArgs)
 			if (Class->IsChildOf(UAttributeSet::StaticClass()) ||
 				(Class->IsChildOf(UAbilitySystemComponent::StaticClass()) && !Class->ClassGeneratedBy))
 			{
-				StringArray.Add(FString::Printf(TEXT("%s.%s"), *FSSUtils::GetAttributeClassName(Class), *InAttribute.GetName()));
+				StringArray.Add(FString::Printf(TEXT("%s.%s"), *FSGUtils::GetAttributeClassName(Class), *InAttribute.GetName()));
 			}
 		}
 		//Feature End
@@ -231,8 +231,8 @@ void SSSGameplayAttributeListWidget::Construct(const FArguments& InArgs)
 	AttributeTextFilter = MakeShared<FAttributeTextFilter>(FAttributeTextFilter::FItemToStringArray::CreateStatic(&FLocal::AttributeToStringArray));
 
 	// Preload to ensure BP Attributes are loaded in memory so that they can be listed here
-	// ISSEditorModule::Get().PreloadAssetsByClass(USagaAttributeSetBlueprint::StaticClass());
-	FSagaStatsEditorModule::Get().PreloadAssetsByClass(USagaAttributeSetBlueprint::StaticClass());
+	// ISSEditorModule::Get().PreloadAssetsByClass(USGAttributeSetBlueprint::StaticClass());
+	FSagaStatsEditorModule::Get().PreloadAssetsByClass(USGAttributeSetBlueprint::StaticClass());
 	
 	UpdatePropertyOptions();
 	
@@ -313,7 +313,7 @@ TSharedPtr<FSSGameplayAttributeViewerNode> SSSGameplayAttributeListWidget::Updat
 	*/
 
 	// Use IncludeSuper for iteration here only if bShowOnlyOwnedAttributed is used. To handle the use case of
-	// FSagaClampedGameplayAttributeData defined in a native class (for instance after wizard generation), whose value
+	// FSGClampedGameplayAttributeData defined in a native class (for instance after wizard generation), whose value
 	// are tweaked in the details panel of a child Blueprint
 	
 	//Feature Begin Attribute In subclass of AttributeSet
@@ -335,7 +335,7 @@ TSharedPtr<FSSGameplayAttributeViewerNode> SSSGameplayAttributeListWidget::Updat
 			continue;
 		}
 		
-		if (FSSUtils::IsValidAttributeClass(Class))
+		if (FSGUtils::IsValidAttributeClass(Class))
 		{
 			// Allow entire classes to be filtered globally
 			if (Class->HasMetaData(TEXT("HideInDetailsView")))
@@ -374,12 +374,12 @@ TSharedPtr<FSSGameplayAttributeViewerNode> SSSGameplayAttributeListWidget::Updat
 
 				// Only allow field of expected types
 				FString CPPType = Property->GetCPPType();
-				if (!FSSUtils::IsValidCPPType(CPPType))
+				if (!FSGUtils::IsValidCPPType(CPPType))
 				{
 					continue;
 				}
 
-				const FString AttributeName = FString::Printf(TEXT("%s.%s"), *FSSUtils::GetAttributeClassName(Class), *Property->GetName());
+				const FString AttributeName = FString::Printf(TEXT("%s.%s"), *FSGUtils::GetAttributeClassName(Class), *Property->GetName());
 
 				/*
 				// Allow properties to be filtered globally via Developer Settings (never show up)
@@ -551,7 +551,7 @@ FText SSagaGameplayAttributeWidget::GetSelectedValueAsString() const
 	//Feature End
 	
 	const FString PropertyName = SelectedPropertyPtr->GetDisplayNameText().ToString();
-	const FString PropertyString = FString::Printf(TEXT("%s.%s"), *FSSUtils::GetAttributeClassName(Class), *PropertyName);
+	const FString PropertyString = FString::Printf(TEXT("%s.%s"), *FSGUtils::GetAttributeClassName(Class), *PropertyName);
 	return FText::FromString(PropertyString);
 }
 

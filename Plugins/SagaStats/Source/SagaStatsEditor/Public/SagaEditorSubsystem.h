@@ -32,7 +32,7 @@ struct FAssetDependency;
  *
  * ---
  *
- * Subsystem register to an OnVariableRename delegate fired off from `USagaAttributeSetBlueprint`, and handle any editor specific code.
+ * Subsystem register to an OnVariableRename delegate fired off from `USGAttributeSetBlueprint`, and handle any editor specific code.
  *
  * When a rename happens, this event fires off and triggers the following logic in this subsystem:
  *

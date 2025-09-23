@@ -8,14 +8,14 @@
 
 #include "AttributeSet.h"
 #include "DetailWidgetRow.h"
-#include "SagaStatsDelegates.h"
+#include "SGDelegates.h"
 #include "SSEditorLog.h"
 #include "IPropertyUtilities.h"
 #include "Details/Slate/SSagaGameplayAttributeWidget.h"
 
 FSagaGameplayAttributeDetails::~FSagaGameplayAttributeDetails()
 {
-	FSagaStatsDelegates::OnRequestDetailsRefresh.RemoveAll(this);
+	FSGDelegates::OnRequestDetailsRefresh.RemoveAll(this);
 }
 
 TSharedRef<IPropertyTypeCustomization> FSagaGameplayAttributeDetails::MakeInstance()
@@ -29,7 +29,7 @@ void FSagaGameplayAttributeDetails::CustomizeHeader(TSharedRef<IPropertyHandle> 
 	SS_EDITOR_LOG(Verbose, TEXT("FSagaGameplayAttributeDetails::CustomizeHeader ..."))
 
 	const TSharedPtr<IPropertyUtilities> Utilities = StructCustomizationUtils.GetPropertyUtilities();
-	FSagaStatsDelegates::OnRequestDetailsRefresh.AddSP(this, &FSagaGameplayAttributeDetails::HandleRequestRefresh, Utilities);
+	FSGDelegates::OnRequestDetailsRefresh.AddSP(this, &FSagaGameplayAttributeDetails::HandleRequestRefresh, Utilities);
 
 	// Can't use GET_MEMBER_NAME_CHECKED for those two props since they're private and requires adding this class as a friend class to FGameplayAttribute
 	//

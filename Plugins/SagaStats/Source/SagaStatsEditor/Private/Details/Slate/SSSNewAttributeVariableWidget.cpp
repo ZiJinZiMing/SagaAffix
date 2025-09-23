@@ -16,7 +16,7 @@
 #include "PinTypeSelectorFilter.h"
 #include "ScopedTransaction.h"
 #include "SlateOptMacros.h"
-#include "AttributeSet/SagaAttributeSet.h"
+#include "AttributeSet/SGAttributeSet.h"
 #include "Details/Slate/SSSVariableRowWidget.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Kismet2/BlueprintEditorUtils.h"
@@ -329,13 +329,13 @@ bool SSSNewAttributeVariableWidget::AddMemberVariable(UBlueprint* InBlueprint, c
 
 				// Figure out the property type, so that we know which member reference to build
 				FName MemberName = TEXT("HandleRepNotifyForGameplayAttributeData");
-				if (InPinType.PinSubCategoryObject.IsValid() && InPinType.PinSubCategoryObject->GetName() == TEXT("SagaClampedGameplayAttributeData"))
+				if (InPinType.PinSubCategoryObject.IsValid() && InPinType.PinSubCategoryObject->GetName() == TEXT("SGClampedGameplayAttributeData"))
 				{
 					MemberName = TEXT("HandleRepNotifyForGameplayClampedAttributeData");
 				}
 				
 				FMemberReference MemberReference;
-				MemberReference.SetExternalMember(MemberName, USagaAttributeSet::StaticClass());
+				MemberReference.SetExternalMember(MemberName, USGAttributeSet::StaticClass());
 
 				Node->FunctionReference = MemberReference;
 				Node->CreateNewGuid();

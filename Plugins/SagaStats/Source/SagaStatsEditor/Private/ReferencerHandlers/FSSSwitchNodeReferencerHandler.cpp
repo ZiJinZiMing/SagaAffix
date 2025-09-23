@@ -9,7 +9,7 @@
 #include "EdGraph/EdGraph.h"
 #include "Engine/Blueprint.h"
 #include "SagaEditorSubsystem.h"
-#include "GraphNode/SagaK2Node_SwitchGameplayAttribute.h"
+#include "GraphNode/K2Node_SwitchGameplayAttribute.h"
 
 
 TSharedPtr<ISSAttributeReferencerHandler> FSSSwitchNodeReferencerHandler::Create()
@@ -35,7 +35,7 @@ bool FSSSwitchNodeReferencerHandler::HandlePreCompile(const FAssetIdentifier& In
 {
 	SS_EDITOR_NS_LOG(Verbose, TEXT("InAssetIdentifier: %s, InPayload: %s"), *InAssetIdentifier.ToString(), *InPayload.ToString())
 
-	const USagaK2Node_SwitchGameplayAttribute* Node = Cast<USagaK2Node_SwitchGameplayAttribute>(InPayload.DefaultObject);
+	const UK2Node_SwitchGameplayAttribute* Node = Cast<UK2Node_SwitchGameplayAttribute>(InPayload.DefaultObject);
 	if (!Node)
 	{
 		return false;
@@ -79,7 +79,7 @@ bool FSSSwitchNodeReferencerHandler::HandleAttributeRename(const FAssetIdentifie
 {
 	SS_EDITOR_NS_LOG(Verbose, TEXT("InAssetIdentifier: %s, InPayload: %s"), *InAssetIdentifier.ToString(), *InPayload.ToString())
 	
-	USagaK2Node_SwitchGameplayAttribute* Node = Cast<USagaK2Node_SwitchGameplayAttribute>(InPayload.DefaultObject);
+	UK2Node_SwitchGameplayAttribute* Node = Cast<UK2Node_SwitchGameplayAttribute>(InPayload.DefaultObject);
 	if (!Node)
 	{
 		return false;

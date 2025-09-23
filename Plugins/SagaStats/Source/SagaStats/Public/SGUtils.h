@@ -11,7 +11,7 @@
 class UAttributeSet;
 class UAbilitySystemComponent;
 
-class FSSUtils final
+class FSGUtils final
 {
 public:
 	/** Strips out any trailing "_C" from Blueprint class names */

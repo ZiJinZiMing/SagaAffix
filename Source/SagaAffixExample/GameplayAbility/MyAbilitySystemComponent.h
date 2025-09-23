@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
-#include "SagaAbilitySystemComponent.h"
+#include "SGAbilitySystemComponent.h"
 #include "MyAbilitySystemComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class SAGAAFFIXEXAMPLE_API UMyAbilitySystemComponent : public USagaAbilitySystemComponent
+class SAGAAFFIXEXAMPLE_API UMyAbilitySystemComponent : public USGAbilitySystemComponent
 {
 	GENERATED_BODY()
 

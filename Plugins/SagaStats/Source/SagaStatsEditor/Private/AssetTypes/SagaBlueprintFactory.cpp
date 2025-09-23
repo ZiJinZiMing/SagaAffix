@@ -14,8 +14,8 @@
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "BlueprintEditorSettings.h"
-#include "AttributeSet/SagaAttributeSet.h"
-#include "AttributeSet/SagaAttributeSetBlueprint.h"
+#include "AttributeSet/SGAttributeSet.h"
+#include "AttributeSet/SGAttributeSetBlueprint.h"
 
 
 #define LOCTEXT_NAMESPACE "USagaBlueprintFactory"
@@ -37,7 +37,7 @@ public:
 	void Construct(const FArguments& InArgs)
 	{
 		bOkClicked = false;
-		ParentClass = USagaAttributeSet::StaticClass();
+		ParentClass = USGAttributeSet::StaticClass();
 
 		ChildSlot
 		[
@@ -159,7 +159,7 @@ private:
 		Options.ClassFilters.Add(Filter.ToSharedRef());
 
 		// All child child classes of USS are valid.
-		Filter->AllowedChildrenOfClasses.Add(USagaAttributeSet::StaticClass());
+		Filter->AllowedChildrenOfClasses.Add(USGAttributeSet::StaticClass());
 
 		ParentClassContainer->ClearChildren();
 		ParentClassContainer->AddSlot()
@@ -248,8 +248,8 @@ USagaBlueprintFactory::USagaBlueprintFactory(const FObjectInitializer& ObjectIni
 {
 	bCreateNew = true;
 	bEditAfterNew = true;
-	SupportedClass = USagaAttributeSetBlueprint::StaticClass();
-	ParentClass = USagaAttributeSet::StaticClass();
+	SupportedClass = USGAttributeSetBlueprint::StaticClass();
+	ParentClass = USGAttributeSet::StaticClass();
 }
 
 bool USagaBlueprintFactory::ConfigureProperties()
@@ -261,7 +261,7 @@ bool USagaBlueprintFactory::ConfigureProperties()
 UObject* USagaBlueprintFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn, FName CallingContext)
 {
 	// Make sure we are trying to factory a Agile FSM blueprint, then create and init one
-	check(Class->IsChildOf(USagaAttributeSetBlueprint::StaticClass()));
+	check(Class->IsChildOf(USGAttributeSetBlueprint::StaticClass()));
 
 	// If they selected an interface, force the parent class to be UInterface
 	if (BlueprintType == BPTYPE_Interface)
@@ -269,7 +269,7 @@ UObject* USagaBlueprintFactory::FactoryCreateNew(UClass* Class, UObject* InParen
 		ParentClass = UInterface::StaticClass();
 	}
 
-	if ((ParentClass == nullptr) || !FKismetEditorUtilities::CanCreateBlueprintOfClass(ParentClass) || !ParentClass->IsChildOf(USagaAttributeSet::StaticClass()))
+	if ((ParentClass == nullptr) || !FKismetEditorUtilities::CanCreateBlueprintOfClass(ParentClass) || !ParentClass->IsChildOf(USGAttributeSet::StaticClass()))
 	{
 		FFormatNamedArguments Args;
 		Args.Add(TEXT("ClassName"), (ParentClass != nullptr) ? FText::FromString(ParentClass->GetName()) : LOCTEXT("Null", "(null)"));
@@ -278,7 +278,7 @@ UObject* USagaBlueprintFactory::FactoryCreateNew(UClass* Class, UObject* InParen
 	}
 	else
 	{
-		USagaAttributeSetBlueprint* NewBP = CastChecked<USagaAttributeSetBlueprint>(FKismetEditorUtilities::CreateBlueprint(ParentClass, InParent, Name, BlueprintType, USagaAttributeSetBlueprint::StaticClass(), UBlueprintGeneratedClass::StaticClass(), CallingContext));
+		USGAttributeSetBlueprint* NewBP = CastChecked<USGAttributeSetBlueprint>(FKismetEditorUtilities::CreateBlueprint(ParentClass, InParent, Name, BlueprintType, USGAttributeSetBlueprint::StaticClass(), UBlueprintGeneratedClass::StaticClass(), CallingContext));
 
 		if (NewBP)
 		{
@@ -289,15 +289,15 @@ UObject* USagaBlueprintFactory::FactoryCreateNew(UClass* Class, UObject* InParen
 				UEdGraph* EventGraph = NewBP->UbergraphPages[0];
 
 				// Those are the 3 non-const, no return values events. They appear in event graph
-				FKismetEditorUtilities::AddDefaultEventNode(NewBP, EventGraph, FName(TEXT("K2_PostGameplayEffectExecute")), USagaAttributeSet::StaticClass(), NodePositionY);
-				FKismetEditorUtilities::AddDefaultEventNode(NewBP, EventGraph, FName(TEXT("K2_PostAttributeChange")), USagaAttributeSet::StaticClass(), NodePositionY);
+				FKismetEditorUtilities::AddDefaultEventNode(NewBP, EventGraph, FName(TEXT("K2_PostGameplayEffectExecute")), USGAttributeSet::StaticClass(), NodePositionY);
+				FKismetEditorUtilities::AddDefaultEventNode(NewBP, EventGraph, FName(TEXT("K2_PostAttributeChange")), USGAttributeSet::StaticClass(), NodePositionY);
 
 				// Those are implemented as overridable functions, cause they're either const or return values
 				// And AddDefaultEventNode won't work for them (well the nodes are created but will complain on the first compilation if wired
-				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PreAttributeChange")), USagaAttributeSet::StaticClass(), NodePositionY);
-				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PreAttributeBaseChange")), USagaAttributeSet::StaticClass(), NodePositionY);
-				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PreAttributeChange")), USagaAttributeSet::StaticClass(), NodePositionY);
-				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PostAttributeBaseChange")), USagaAttributeSet::StaticClass(), NodePositionY);
+				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PreAttributeChange")), USGAttributeSet::StaticClass(), NodePositionY);
+				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PreAttributeBaseChange")), USGAttributeSet::StaticClass(), NodePositionY);
+				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PreAttributeChange")), USGAttributeSet::StaticClass(), NodePositionY);
+				// FKismetEditorUtilities::AddDefaultEventNode(Blueprint, EventGraph, FName(TEXT("K2_PostAttributeBaseChange")), USGAttributeSet::StaticClass(), NodePositionY);
 			}
 		}
 		return NewBP;

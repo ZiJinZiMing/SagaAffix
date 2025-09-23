@@ -10,12 +10,12 @@
 
 SAGASTATS_API DECLARE_LOG_CATEGORY_EXTERN(LogSagaStats, Display, All);
 
-#define SS_LOG(Verbosity, Format, ...) \
+#define SG_LOG(Verbosity, Format, ...) \
 { \
     UE_LOG(LogSagaStats, Verbosity, Format, ##__VA_ARGS__); \
 }
 
-#define SS_NS_LOG(Verbosity, Format, ...) \
+#define SG_NS_LOG(Verbosity, Format, ...) \
 { \
     UE_LOG(LogSagaStats, Verbosity, TEXT("%s - %s"), *FString(__FUNCTION__), *FString::Printf(Format, ##__VA_ARGS__)); \
 }

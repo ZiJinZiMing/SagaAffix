@@ -11,9 +11,9 @@
 #include "AbilityAsync_WaitMeterStateChange.generated.h"
 
 
-class USagaDecreaseMeter;
+class UDecreaseMeter;
 enum class EMeterState : uint8;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWaitMeterStateChangeEvent, USagaDecreaseMeter*, Meter, EMeterState, NewState,EMeterState, OldState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWaitMeterStateChangeEvent, UDecreaseMeter*, Meter, EMeterState, NewState,EMeterState, OldState);
 
 /**
  * 
@@ -28,7 +28,7 @@ public:
 	FOnWaitMeterStateChangeEvent OnStateChange;
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|Async", meta = (DefaultToSelf = "TargetActor", BlueprintInternalUseOnly = "TRUE"))
-	static UAbilityAsync_WaitMeterStateChange* WaitMeterStateChange(AActor* TargetActor, TSubclassOf<USagaDecreaseMeter> MeterClass);
+	static UAbilityAsync_WaitMeterStateChange* WaitMeterStateChange(AActor* TargetActor, TSubclassOf<UDecreaseMeter> MeterClass);
 
 protected:
 	virtual void Activate() override;
@@ -39,8 +39,8 @@ private:
 	FDelegateHandle MeterStateChangeHandle;
 
 	UPROPERTY()
-	TSubclassOf<USagaDecreaseMeter> MeterClass;
+	TSubclassOf<UDecreaseMeter> MeterClass;
 
 	UFUNCTION()
-	void OnMeterStateChangeCallback(USagaDecreaseMeter* Meter,EMeterState OldState);
+	void OnMeterStateChangeCallback(UDecreaseMeter* Meter,EMeterState OldState);
 };

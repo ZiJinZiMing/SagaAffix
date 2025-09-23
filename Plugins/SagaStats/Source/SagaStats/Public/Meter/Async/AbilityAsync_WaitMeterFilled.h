@@ -11,8 +11,8 @@
 #include "AbilityAsync_WaitMeterFilled.generated.h"
 
 
-class USagaMeterBase;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaitMeterFilledEvent, USagaMeterBase*, Meter);
+class UMeterBase;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaitMeterFilledEvent, UMeterBase*, Meter);
 
 /**
  * 
@@ -28,7 +28,7 @@ public:
 	FOnWaitMeterFilledEvent OnFilled;
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|Async", meta = (DefaultToSelf = "TargetActor", BlueprintInternalUseOnly = "TRUE"))
-	static UAbilityAsync_WaitMeterFilled* WaitMeterFilled(AActor* TargetActor, TSubclassOf<USagaMeterBase> MeterClass);
+	static UAbilityAsync_WaitMeterFilled* WaitMeterFilled(AActor* TargetActor, TSubclassOf<UMeterBase> MeterClass);
 
 protected:
 	virtual void Activate() override;
@@ -39,10 +39,10 @@ private:
 	FDelegateHandle MeterFilledHandle;
 
 	UPROPERTY()
-	TSubclassOf<USagaMeterBase> MeterClass;
+	TSubclassOf<UMeterBase> MeterClass;
 
 	UFUNCTION()
-	void OnMeterFilledCallback(USagaMeterBase* Meter);
+	void OnMeterFilledCallback(UMeterBase* Meter);
 	
 };
 

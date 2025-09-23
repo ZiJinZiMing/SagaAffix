@@ -7,16 +7,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SagaMeterBase.h"
-#include "SagaIncreaseMeter.generated.h"
+#include "MeterBase.h"
+#include "IncreaseMeter.generated.h"
 
 /**
- * @class USagaIncreaseMeter
+ * @class UIncreaseMeter
  * @brief 一种随时间衰减的计量条 (A meter that degenerates over time).
  *
  * @details
- * 该类继承自 USagaMeterBase，并额外实现了一种“衰减”机制。
- * This class inherits from USagaMeterBase and adds a "degeneration" mechanism.
+ * 该类继承自 UMeterBase，并额外实现了一种“衰减”机制。
+ * This class inherits from UMeterBase and adds a "degeneration" mechanism.
  *
  * 主要用于实现那些在没有持续获得时会随时间减少的数值，例如连击点数、临时的护盾或过热值等。
  * It is primarily used for values that should decrease over time if not actively maintained, such as combo points, temporary shields, or overheat values.
@@ -29,16 +29,16 @@
  * 3. 当冷却计时器结束后，计量条会根据 "Degeneration" 属性设定的速率开始持续减少，直到归零。
  *    After the cooldown timer finishes, the meter will begin to decrease continuously at the rate defined by the "Degeneration" attribute, until it reaches zero.
  *
- * @see USagaMeterBase
+ * @see UMeterBase
  */
 UCLASS(Abstract)
-class SAGASTATS_API USagaIncreaseMeter : public USagaMeterBase
+class SAGASTATS_API UIncreaseMeter : public UMeterBase
 {
 	GENERATED_BODY()
 
 public:
 	
-	explicit USagaIncreaseMeter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	explicit UIncreaseMeter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	
 	/**
@@ -76,11 +76,11 @@ public:
 	}
 	
 protected:
-	friend class USagaAbilitySystemComponent;
+	friend class USGAbilitySystemComponent;
 
 	virtual void InitFromMetaDataTable(const UDataTable* DataTable) override;
 	
-	virtual void OnAccumulate_Implementation(const FSagaAttributeSetExecutionData& Data) override;
+	virtual void OnAccumulate_Implementation(const FSGAttributeSetExecutionData& Data) override;
 
 	virtual void PostAccumulate() override;
 	

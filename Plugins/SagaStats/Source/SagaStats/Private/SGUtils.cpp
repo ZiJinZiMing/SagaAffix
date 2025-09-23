@@ -3,15 +3,14 @@
 * Author:       Jinming Zhang
 * Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
 ******************************************************************************************/
-#include "AttributeSet/SSUtils.h"
-
+#include "SGUtils.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemTestAttributeSet.h"
 #include "AttributeSet.h"
-#include "AttributeSet/SagaAttributeSet.h"
+#include "AttributeSet/SGAttributeSet.h"
 #include "UObject/UObjectIterator.h"
 
-FString FSSUtils::GetAttributeClassName(const UClass* Class)
+FString FSGUtils::GetAttributeClassName(const UClass* Class)
 {
 	if (!Class)
 	{
@@ -29,7 +28,7 @@ FString FSSUtils::GetAttributeClassName(const UClass* Class)
 	return GetAttributeClassName(Class->GetName());
 }
 
-FString FSSUtils::GetAttributeClassName(FString ClassName)
+FString FSGUtils::GetAttributeClassName(FString ClassName)
 {
 	if (ClassName.IsEmpty())
 	{
@@ -40,7 +39,7 @@ FString FSSUtils::GetAttributeClassName(FString ClassName)
 	return ClassName;
 }
 
-void FSSUtils::GetAllAttributeProperties(TArray<FProperty*>& OutProperties, const FString InFilterMetaStr, const bool bInUseEditorOnlyData)
+void FSGUtils::GetAllAttributeProperties(TArray<FProperty*>& OutProperties, const FString InFilterMetaStr, const bool bInUseEditorOnlyData)
 {
 	// Gather all UAttribute classes
 	for (TObjectIterator<UClass> ClassIt; ClassIt; ++ClassIt)
@@ -91,7 +90,7 @@ void FSSUtils::GetAllAttributeProperties(TArray<FProperty*>& OutProperties, cons
 	}
 }
 
-void FSSUtils::GetAllAttributeFromClass(const UClass* InClass, TArray<FProperty*>& OutProperties, const FString InFilterMetaStr, const bool bInUseEditorOnlyData)
+void FSGUtils::GetAllAttributeFromClass(const UClass* InClass, TArray<FProperty*>& OutProperties, const FString InFilterMetaStr, const bool bInUseEditorOnlyData)
 {
 	check(InClass);
 	
@@ -126,7 +125,7 @@ void FSSUtils::GetAllAttributeFromClass(const UClass* InClass, TArray<FProperty*
 	}
 }
 
-bool FSSUtils::IsValidAttributeClass(const UClass* Class)
+bool FSGUtils::IsValidAttributeClass(const UClass* Class)
 {
 	if (!Class)
 	{
@@ -143,7 +142,7 @@ bool FSSUtils::IsValidAttributeClass(const UClass* Class)
 	if (Class->ClassGeneratedBy)
 	{
 		// Only allow BP subclass we know
-		if (!Class->IsChildOf(USagaAttributeSet::StaticClass()))
+		if (!Class->IsChildOf(USGAttributeSet::StaticClass()))
 		{
 			return false;
 		}
@@ -167,14 +166,14 @@ TReturnType* GetIfValid(TWeakObjectPtr<TReturnType> WeakObjectPtr)
 	return WeakObjectPtr.IsValid() ? WeakObjectPtr.Get() : nullptr;
 }
 
-bool FSSUtils::IsValidCPPType(const FString& InCPPType)
+bool FSGUtils::IsValidCPPType(const FString& InCPPType)
 {
 	if (InCPPType == TEXT("FGameplayAttributeData"))
 	{
 		return true;
 	}
 
-	if (InCPPType == TEXT("FSagaClampedGameplayAttributeData"))
+	if (InCPPType == TEXT("FSGClampedGameplayAttributeData"))
 	{
 		return true;
 	}
@@ -184,7 +183,7 @@ bool FSSUtils::IsValidCPPType(const FString& InCPPType)
 	return false;
 }
 
-void FSSUtils::SerializeAttributeSet(UAttributeSet* InAttributeSet, FArchive& InArchive)
+void FSGUtils::SerializeAttributeSet(UAttributeSet* InAttributeSet, FArchive& InArchive)
 {
 	if (!InArchive.IsSaveGame())
 	{
@@ -250,7 +249,7 @@ void FSSUtils::SerializeAttributeSet(UAttributeSet* InAttributeSet, FArchive& In
 	}
 }
 
-void FSSUtils::SerializeAbilitySystemComponentAttributes(const UAbilitySystemComponent* InASC, FArchive& InArchive)
+void FSGUtils::SerializeAbilitySystemComponentAttributes(const UAbilitySystemComponent* InASC, FArchive& InArchive)
 {
 	if (!InArchive.IsSaveGame())
 	{

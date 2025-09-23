@@ -29,9 +29,6 @@ public class SagaStats : ModuleRules
 			new string[]
 			{
 				"Core",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
 				// ... add other public dependencies that you statically link with here ...
 			}
 		);
@@ -43,6 +40,11 @@ public class SagaStats : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Projects",
+				"NetCore",
+				"GameplayTags",
+				"GameplayTasks",
+				"GameplayAbilities",
+				
 				// ... add private dependencies that you statically link with here ...	
 			}
 		);

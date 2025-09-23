@@ -5,46 +5,47 @@
 ******************************************************************************************/
 
 
-#include "Meter/SagaDecreaseMeter.h"
+#include "Meter/DecreaseMeter.h"
 #include "GameplayEffectExtension.h"
-#include "SagaAbilitySystemComponent.h"
+#include "SGAbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
 
 DEFINE_ENUM_TO_STRING(EMeterState, "/Script/SagaStats")
 
 
-USagaDecreaseMeter::USagaDecreaseMeter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
+UDecreaseMeter::UDecreaseMeter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
-	Current.MinValue.ClampType = ESagaClampingType::AttributeBased;
+	Current.MinValue.ClampType = ESGClampingType::AttributeBased;
 	Current.MinValue.Attribute = GetMinimumClampAttribute();
-	Current.MaxValue.ClampType = ESagaClampingType::AttributeBased;
+	Current.MaxValue.ClampType = ESGClampingType::AttributeBased;
 	Current.MaxValue.Attribute = GetMaximumAttribute();
 
 	SetMeterState(EMeterState::Normal);
 }
 
-void USagaDecreaseMeter::StopLockState()
+void UDecreaseMeter::StopLockState()
 {
 	check(MeterState == EMeterState::Lock);
 	OnLockStateFinish();
 }
 
-void USagaDecreaseMeter::StopResetState()
+void UDecreaseMeter::StopResetState()
 {
 	check(MeterState == EMeterState::Reset);
 	SetMeterState(EMeterState::Normal);
 }
 
-void USagaDecreaseMeter::OnRep_MeterState(const EMeterState& OldValue)
+void UDecreaseMeter::OnRep_MeterState(const EMeterState& OldValue)
 {
-	Cast<USagaAbilitySystemComponent>(GetOwningAbilitySystemComponent())->GetMeterStateChangeDelegate(GetClass()).Broadcast(this,OldValue);
+	Cast<USGAbilitySystemComponent>(GetOwningAbilitySystemComponent())->GetMeterStateChangeDelegate(GetClass()).Broadcast(this,OldValue);
 }
 
 
-void USagaDecreaseMeter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void UDecreaseMeter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MinimumClamp, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Regeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, RegenerationCooldown, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, LockDuration, COND_None, REPNOTIFY_Always);
@@ -54,12 +55,12 @@ void USagaDecreaseMeter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MeterState, COND_None, REPNOTIFY_OnChanged);
 }
 
-void USagaDecreaseMeter::OnReduce_Implementation(const FSagaAttributeSetExecutionData& Data)
+void UDecreaseMeter::OnReduce_Implementation(const FSGAttributeSetExecutionData& Data)
 {
 	Super::OnReduce_Implementation(Data);
 }
 
-void USagaDecreaseMeter::PostReduce()
+void UDecreaseMeter::PostReduce()
 {
 	Super::PostReduce();
 
@@ -70,7 +71,7 @@ void USagaDecreaseMeter::PostReduce()
 	}
 }
 
-bool USagaDecreaseMeter::PreGameplayEffectExecute(struct FGameplayEffectModCallbackData& Data)
+bool UDecreaseMeter::PreGameplayEffectExecute(struct FGameplayEffectModCallbackData& Data)
 {
 	if (!Super::PreGameplayEffectExecute(Data))return false;
 	if (IsInResetImmune())return false;
@@ -78,7 +79,7 @@ bool USagaDecreaseMeter::PreGameplayEffectExecute(struct FGameplayEffectModCallb
 	return true;
 }
 
-void USagaDecreaseMeter::Tick(float DeltaTime)
+void UDecreaseMeter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -103,18 +104,18 @@ void USagaDecreaseMeter::Tick(float DeltaTime)
 	}
 }
 
-bool USagaDecreaseMeter::CanRegeneration() const
+bool UDecreaseMeter::CanRegeneration() const
 {
 	return GetRegeneration() > 0 && !RegenerationCooldownTimer.IsValid();
 }
 
-void USagaDecreaseMeter::InitFromMetaDataTable(const UDataTable* DataTable)
+void UDecreaseMeter::InitFromMetaDataTable(const UDataTable* DataTable)
 {
 	Super::InitFromMetaDataTable(DataTable);
 	SetCurrent(GetMaximum());
 }
 
-void USagaDecreaseMeter::OnRegenerationCooldownTimerFinish()
+void UDecreaseMeter::OnRegenerationCooldownTimerFinish()
 {
 	RegenerationCooldownTimer.Invalidate();
 
@@ -124,7 +125,7 @@ void USagaDecreaseMeter::OnRegenerationCooldownTimerFinish()
 	}
 }
 
-void USagaDecreaseMeter::OnLockStateFinish()
+void UDecreaseMeter::OnLockStateFinish()
 {
 	LockStateTimer.Invalidate();
 
@@ -139,7 +140,7 @@ void USagaDecreaseMeter::OnLockStateFinish()
 	}
 }
 
-void USagaDecreaseMeter::OnEmptied_Implementation()
+void UDecreaseMeter::OnEmptied_Implementation()
 {
 	Super::OnEmptied_Implementation();
 
@@ -158,7 +159,7 @@ void USagaDecreaseMeter::OnEmptied_Implementation()
 	}
 }
 
-void USagaDecreaseMeter::OnFilled_Implementation()
+void UDecreaseMeter::OnFilled_Implementation()
 {
 	Super::OnFilled_Implementation();
 
@@ -168,7 +169,7 @@ void USagaDecreaseMeter::OnFilled_Implementation()
 	}
 }
 
-bool USagaDecreaseMeter::IsInResetImmune() const
+bool UDecreaseMeter::IsInResetImmune() const
 {
 	if (MeterState == EMeterState::Reset)
 	{
@@ -184,12 +185,12 @@ bool USagaDecreaseMeter::IsInResetImmune() const
 	return false;
 }
 
-void USagaDecreaseMeter::SetMeterState(EMeterState NewState)
+void UDecreaseMeter::SetMeterState(EMeterState NewState)
 {
 	if (MeterState != NewState)
 	{
 		EMeterState OldState = MeterState;
 		MeterState = NewState;
-		Cast<USagaAbilitySystemComponent>(GetOwningAbilitySystemComponent())->GetMeterStateChangeDelegate(GetClass()).Broadcast(this,OldState);
+		Cast<USGAbilitySystemComponent>(GetOwningAbilitySystemComponent())->GetMeterStateChangeDelegate(GetClass()).Broadcast(this,OldState);
 	}
 }

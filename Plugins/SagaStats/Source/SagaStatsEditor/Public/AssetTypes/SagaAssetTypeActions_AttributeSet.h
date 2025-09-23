@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "AssetTypeActions/AssetTypeActions_Blueprint.h"
-#include "AttributeSet/SagaAttributeSetBlueprint.h"
+#include "AttributeSet/SGAttributeSetBlueprint.h"
 
 class FSagaAssetTypeActions_AttributeSet : public FAssetTypeActions_Blueprint
 {
@@ -17,7 +17,7 @@ public:
 	// IAssetTypeActions Implementation
 	virtual FText GetName() const override
 	{
-		return NSLOCTEXT("AssetTypeActions", "SagaAssetTypeActions_AttributeSet", "SagaAttributeSet");
+		return NSLOCTEXT("AssetTypeActions", "SagaAssetTypeActions_AttributeSet", "SGAttributeSet");
 	}
 
 	virtual FColor GetTypeColor() const override
@@ -27,7 +27,7 @@ public:
 	
 	virtual UClass* GetSupportedClass() const override
 	{
-		return USagaAttributeSetBlueprint::StaticClass();
+		return USGAttributeSetBlueprint::StaticClass();
 	}
 	
 	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;

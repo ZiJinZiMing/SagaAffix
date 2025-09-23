@@ -11,7 +11,7 @@
 #include "GameplayEffect.h"
 #include "K2Node.h"
 #include "MessageLogModule.h"
-#include "SagaStatsDelegates.h"
+#include "SGDelegates.h"
 #include "TimerManager.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/BlueprintEditorUtils.h"
@@ -38,12 +38,12 @@ void USagaEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	InitOptions.bShowPages = true;
 	MessageLogModule.RegisterLogListing(LogName, LOCTEXT("SagaStatsLog", "SagaStats Log"), InitOptions);
 
-	FSagaStatsDelegates::OnVariableRenamed.AddUObject(this, &USagaEditorSubsystem::HandleAttributeRename);
-	FSagaStatsDelegates::OnPreCompile.AddUObject(this, &USagaEditorSubsystem::HandlePreCompile);
+	FSGDelegates::OnVariableRenamed.AddUObject(this, &USagaEditorSubsystem::HandleAttributeRename);
+	FSGDelegates::OnPreCompile.AddUObject(this, &USagaEditorSubsystem::HandlePreCompile);
 
 	// Seems like a ForceRefresh() on FGameplayAttribute Details avoids the need to re-open the GE BP to update the Attribute picker
 	// but still getting occasional crash on Array export text
-	FSagaStatsDelegates::OnPostCompile.AddUObject(this, &USagaEditorSubsystem::HandlePostCompile);
+	FSGDelegates::OnPostCompile.AddUObject(this, &USagaEditorSubsystem::HandlePostCompile);
 
 	// Register handlers
 	RegisterReferencerHandler(TEXT("GameplayEffect"), FSSGameplayEffectReferencerHandler::Create());
@@ -58,9 +58,9 @@ void USagaEditorSubsystem::Deinitialize()
 	FMessageLogModule& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
 	MessageLogModule.UnregisterLogListing(LogName);
 
-	FSagaStatsDelegates::OnPreCompile.RemoveAll(this);
-	FSagaStatsDelegates::OnPostCompile.RemoveAll(this);
-	FSagaStatsDelegates::OnVariableRenamed.RemoveAll(this);
+	FSGDelegates::OnPreCompile.RemoveAll(this);
+	FSGDelegates::OnPostCompile.RemoveAll(this);
+	FSGDelegates::OnVariableRenamed.RemoveAll(this);
 }
 
 USagaEditorSubsystem& USagaEditorSubsystem::Get()
@@ -719,7 +719,7 @@ void USagaEditorSubsystem::UpdateReferencers(TArray<FAssetData> InReferencers, c
 				Payload.DefaultObject->PostEditChange();
 				Payload.DefaultObject->MarkPackageDirty();
 
-				FSagaStatsDelegates::OnRequestDetailsRefresh.Broadcast();
+				FSGDelegates::OnRequestDetailsRefresh.Broadcast();
 			}
 		}
 	}

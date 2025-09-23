@@ -7,8 +7,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SagaMeterBase.h"
-#include "SagaDecreaseMeter.generated.h"
+#include "MeterBase.h"
+#include "DecreaseMeter.generated.h"
 
 
 
@@ -25,12 +25,12 @@ DECLARE_ENUM_TO_STRING(EMeterState);
 
 
 /**
- * @class USagaDecreaseMeter
+ * @class UDecreaseMeter
  * @brief 一种随时间恢复的、带有状态机的计量条 (A state machine-driven meter that regenerates over time).
  *
  * @details
- * 该类继承自 USagaMeterBase，用于实现那些通常处于满值，被消耗后会随时间恢复的数值，最典型的用例是“护盾”或“体力”。
- * This class inherits from USagaMeterBase and is designed for values that are typically full and regenerate over time after being depleted. The most common use cases are "Shields" or "Stamina".
+ * 该类继承自 UMeterBase，用于实现那些通常处于满值，被消耗后会随时间恢复的数值，最典型的用例是“护盾”或“体力”。
+ * This class inherits from UMeterBase and is designed for values that are typically full and regenerate over time after being depleted. The most common use cases are "Shields" or "Stamina".
  *
  * 它不仅仅是一个简单的恢复计量条，而是一个包含三种状态的状态机：
  * It is more than a simple regenerating meter; it is a state machine with three states:
@@ -41,15 +41,15 @@ DECLARE_ENUM_TO_STRING(EMeterState);
  * - Reset: 重置状态。在锁定状态结束后进入。在该状态下，计量条会以一个独立的速率 (`ResetRate`) 开始恢复，并且在恢复到一定阈值 (`ImmuneThreshold`) 前可能免疫伤害。
  *   (Reset state. Entered after the Lock state ends. In this state, the meter recovers at a separate `ResetRate` and can be immune to damage until it passes the `ImmuneThreshold`.)
  *
- * @see USagaMeterBase
+ * @see UMeterBase
  */
 UCLASS(Abstract)
-class SAGASTATS_API USagaDecreaseMeter : public USagaMeterBase
+class SAGASTATS_API UDecreaseMeter : public UMeterBase
 {
 	GENERATED_BODY()
 
 public:
-	explicit USagaDecreaseMeter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	explicit UDecreaseMeter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 
 	/**
@@ -179,14 +179,14 @@ public:
 	void StopResetState();
 
 protected:
-	friend class USagaAbilitySystemComponent;
+	friend class USGAbilitySystemComponent;
 	
 	UFUNCTION()
 	void OnRep_MeterState(const EMeterState& OldValue);
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual void OnReduce_Implementation(const FSagaAttributeSetExecutionData& Data) override;
+	virtual void OnReduce_Implementation(const FSGAttributeSetExecutionData& Data) override;
 
 	virtual void PostReduce() override;
 

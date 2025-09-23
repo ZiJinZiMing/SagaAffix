@@ -5,23 +5,23 @@
 ******************************************************************************************/
 
 
-#include "SagaAbilitySystemComponent.h"
+#include "SGAbilitySystemComponent.h"
 
 #include "AbilitySystemGlobals.h"
 #include "DisplayDebugHelpers.h"
 #include "Engine/Canvas.h"
 #include "GameFramework/HUD.h"
-#include "Meter/SagaMeterBase.h"
-#include "Meter/SagaDecreaseMeter.h"
-#include "Meter/SagaIncreaseMeter.h"
+#include "Meter/MeterBase.h"
+#include "Meter/DecreaseMeter.h"
+#include "Meter/IncreaseMeter.h"
 
 
-void USagaAbilitySystemComponent::RemoveAttributeSet(UAttributeSet* AttributeSet)
+void USGAbilitySystemComponent::RemoveAttributeSet(UAttributeSet* AttributeSet)
 {
 	RemoveSpawnedAttribute(AttributeSet);
 }
 
-void USagaAbilitySystemComponent::RemoveAttributeSetByClass(TSubclassOf<UAttributeSet> AttributeSetClass)
+void USGAbilitySystemComponent::RemoveAttributeSetByClass(TSubclassOf<UAttributeSet> AttributeSetClass)
 {
 	if (UAttributeSet* Set = const_cast<UAttributeSet*>(GetAttributeSet(AttributeSetClass)))
 	{
@@ -29,35 +29,35 @@ void USagaAbilitySystemComponent::RemoveAttributeSetByClass(TSubclassOf<UAttribu
 	}
 }
 
-FOnAttributeSetAddOrRemoveEvent& USagaAbilitySystemComponent::GetAttributeSetAddOrRemoveDelegate(TSubclassOf<UAttributeSet> SetClass)
+FOnAttributeSetAddOrRemoveEvent& USGAbilitySystemComponent::GetAttributeSetAddOrRemoveDelegate(TSubclassOf<UAttributeSet> SetClass)
 {
 	return AttributeSetAddOrRemoveDelegates.FindOrAdd(SetClass);
 }
 
-FOnMeterEmptiedEvent& USagaAbilitySystemComponent::GetMeterEmptiedDelegate(TSubclassOf<USagaMeterBase> MeterClass)
+FOnMeterEmptiedEvent& USGAbilitySystemComponent::GetMeterEmptiedDelegate(TSubclassOf<UMeterBase> MeterClass)
 {
 	return MeterEmptiedDelegates.FindOrAdd(MeterClass);
 }
 
-FOnMeterFilledEvent& USagaAbilitySystemComponent::GetMeterFilledDelegate(TSubclassOf<USagaMeterBase> MeterClass)
+FOnMeterFilledEvent& USGAbilitySystemComponent::GetMeterFilledDelegate(TSubclassOf<UMeterBase> MeterClass)
 {
 	return MeterFilledDelegates.FindOrAdd(MeterClass);
 }
 
-FOnMeterStateChangeEvent& USagaAbilitySystemComponent::GetMeterStateChangeDelegate(
-	TSubclassOf<USagaDecreaseMeter> MeterClass)
+FOnMeterStateChangeEvent& USGAbilitySystemComponent::GetMeterStateChangeDelegate(
+	TSubclassOf<UDecreaseMeter> MeterClass)
 {
 	return MeterStateChangeDelegates.FindOrAdd(MeterClass);
 }
 
-void USagaAbilitySystemComponent::OnShowMeterDebugInfo(AHUD* HUD, UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& YL, float& YPos)
+void USGAbilitySystemComponent::OnShowMeterDebugInfo(AHUD* HUD, UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& YL, float& YPos)
 {
 	if (DisplayInfo.IsDisplayOn(TEXT("Meter")))
 	{
 		UWorld* World = HUD->GetWorld();
 
 		AActor* TargetActor = HUD->GetCurrentDebugTargetActor();
-		USagaAbilitySystemComponent* SagaASC = Cast<USagaAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor));
+		USGAbilitySystemComponent* SagaASC = Cast<USGAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor));
 
 		if (SagaASC)
 		{
@@ -72,7 +72,7 @@ void USagaAbilitySystemComponent::OnShowMeterDebugInfo(AHUD* HUD, UCanvas* Canva
 	}
 }
 
-void USagaAbilitySystemComponent::AddSpawnedAttribute(UAttributeSet* AttributeSet)
+void USGAbilitySystemComponent::AddSpawnedAttribute(UAttributeSet* AttributeSet)
 {
 	if (!IsValid(AttributeSet))
 	{
@@ -89,7 +89,7 @@ void USagaAbilitySystemComponent::AddSpawnedAttribute(UAttributeSet* AttributeSe
 	UpdateShouldTick();
 }
 
-void USagaAbilitySystemComponent::RemoveSpawnedAttribute(UAttributeSet* AttributeSet)
+void USGAbilitySystemComponent::RemoveSpawnedAttribute(UAttributeSet* AttributeSet)
 {
 	if(GetSpawnedAttributes().Contains(AttributeSet))
 	{
@@ -100,7 +100,7 @@ void USagaAbilitySystemComponent::RemoveSpawnedAttribute(UAttributeSet* Attribut
 	UpdateShouldTick();
 }
 
-void USagaAbilitySystemComponent::RemoveAllSpawnedAttributes()
+void USGAbilitySystemComponent::RemoveAllSpawnedAttributes()
 {
 	for (UAttributeSet* AttributeSet : GetSpawnedAttributes())
 	{
@@ -112,7 +112,7 @@ void USagaAbilitySystemComponent::RemoveAllSpawnedAttributes()
 	UpdateShouldTick();
 }
 
-void USagaAbilitySystemComponent::OnRep_SpawnedAttributes(const TArray<UAttributeSet*>& PreviousSpawnedAttributes)
+void USGAbilitySystemComponent::OnRep_SpawnedAttributes(const TArray<UAttributeSet*>& PreviousSpawnedAttributes)
 {
 	if (IsUsingRegisteredSubObjectList())
 	{
@@ -149,7 +149,7 @@ void USagaAbilitySystemComponent::OnRep_SpawnedAttributes(const TArray<UAttribut
 
 }
 
-void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& YPos)
+void USGAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& YPos)
 {
 	/**
 	 * ===================================================================================
@@ -157,8 +157,8 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 * ===================================================================================
 	 *
 	 * 【系统概述 / System Overview】
-	 * 为SagaStats插件提供实时的Meter状态可视化调试工具，支持USagaDecreaseMeter和USagaIncreaseMeter。
-	 * Real-time Meter status visualization debug tool for SagaStats plugin, supporting USagaDecreaseMeter and USagaIncreaseMeter.
+	 * 为SagaStats插件提供实时的Meter状态可视化调试工具，支持UDecreaseMeter和UIncreaseMeter。
+	 * Real-time Meter status visualization debug tool for SagaStats plugin, supporting UDecreaseMeter and UIncreaseMeter.
 	 *
 	 * 【整体布局设计 / Overall Layout Design】
 	 * ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -214,14 +214,14 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 * └─ CD信息: 根据Meter类型和状态动态生成
 	 *
 	 * 【CD信息生成规则 / CD Info Generation Rules】
-	 * USagaDecreaseMeter (新格式):
+	 * UDecreaseMeter (新格式):
 	 *   ├─ 冷却中: "(+5.0,CD:2.3/3.0)" - 显示恢复速率和冷却进度
 	 *   ├─ 锁定中: "Lock 1.2/2.0" - 显示锁定剩余/总时间
 	 *   ├─ Normal状态: "+X.X/s" (恢复速率，当regen>0时)
 	 *   ├─ Reset状态: "Reset X.X/s" (重置速率)
 	 *   └─ Lock状态: "Locked" (无计时器时)
 	 *
-	 * USagaIncreaseMeter (新格式):
+	 * UIncreaseMeter (新格式):
 	 *   ├─ 冷却中: "(-1.0,CD:4.2/5.0)" - 显示衰减速率和冷却进度
 	 *   └─ 正常衰减: "-X.X/s" (衰减速率)
 	 *
@@ -250,7 +250,7 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 * 【技术实现要点 / Technical Implementation】
 	 * ├─ friend类访问: 允许访问protected计时器成员
 	 * ├─ 实时计时器: GetTimerManager().GetTimerRemaining()
-	 * ├─ 类型检测: Cast<USagaDecreaseMeter/USagaIncreaseMeter>()
+	 * ├─ 类型检测: Cast<UDecreaseMeter/UIncreaseMeter>()
 	 * ├─ 渲染优化: 先绘制阴影后绘制文字
 	 * ├─ 多色文本: DrawMultiColorLine函数支持单行多色渲染
 	 * ├─ 动态高亮: 基于状态和条件的智能颜色选择
@@ -259,7 +259,7 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	 *
 	 * 【使用方法 / Usage Instructions】
 	 * 游戏内命令: showdebug Meter
-	 * 注册方式: USagaAbilitySystemComponent::OnShowMeterDebugInfo
+	 * 注册方式: USGAbilitySystemComponent::OnShowMeterDebugInfo
 	 * 依赖条件: 需要有效的USagaAbilitySystemComponent和Meter实例
 	 * ===================================================================================
 	 */
@@ -281,7 +281,7 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	}
 
 	// 获取所有Meter实例 / Get all meter instances
-	TArray<USagaMeterBase*> Meters = GetAllMeters();
+	TArray<UMeterBase*> Meters = GetAllMeters();
 
 	if (Meters.Num() == 0)
 	{
@@ -300,7 +300,7 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 
 	for (int32 i = 0; i < Meters.Num(); ++i)
 	{
-		USagaMeterBase* Meter = Meters[i];
+		UMeterBase* Meter = Meters[i];
 		if (!Meter)
 		{
 			continue;
@@ -335,7 +335,7 @@ void USagaAbilitySystemComponent::DrawMeterProgressBars(UCanvas* Canvas, float& 
 	YPos += Meters.Num() * RowSpacing + 10.0f;
 }
 
-void USagaAbilitySystemComponent::DrawSingleMeterProgress(UCanvas* Canvas, USagaMeterBase* Meter, FVector2D Position, FVector2D Size)
+void USGAbilitySystemComponent::DrawSingleMeterProgress(UCanvas* Canvas, UMeterBase* Meter, FVector2D Position, FVector2D Size)
 {
 	if (!Canvas || !Meter)
 	{
@@ -388,7 +388,7 @@ void USagaAbilitySystemComponent::DrawSingleMeterProgress(UCanvas* Canvas, USaga
 }
 
 
-void USagaAbilitySystemComponent::DrawBorder(UCanvas* Canvas, FVector2D Position, FVector2D Size, float BorderWidth)
+void USGAbilitySystemComponent::DrawBorder(UCanvas* Canvas, FVector2D Position, FVector2D Size, float BorderWidth)
 {
 	if (!Canvas)
 	{
@@ -407,21 +407,21 @@ void USagaAbilitySystemComponent::DrawBorder(UCanvas* Canvas, FVector2D Position
 	Canvas->DrawTile(Canvas->DefaultTexture, Position.X + Size.X - BorderWidth, Position.Y, BorderWidth, Size.Y, 0, 0, 1, 1);
 }
 
-TArray<USagaMeterBase*> USagaAbilitySystemComponent::GetAllMeters() const
+TArray<UMeterBase*> USGAbilitySystemComponent::GetAllMeters() const
 {
-	TArray<USagaMeterBase*> Meters;
+	TArray<UMeterBase*> Meters;
 
 	// 遍历所有AttributeSet，查找Meter类型 / Iterate through all AttributeSets to find meter types
 	for (const UAttributeSet* AttributeSet : GetSpawnedAttributes())
 	{
-		if (const USagaMeterBase* Meter = Cast<USagaMeterBase>(AttributeSet))
+		if (const UMeterBase* Meter = Cast<UMeterBase>(AttributeSet))
 		{
-			Meters.Add(const_cast<USagaMeterBase*>(Meter));
+			Meters.Add(const_cast<UMeterBase*>(Meter));
 		}
 	}
 
 	// 按类名排序以保持一致的显示顺序 / Sort by class name for consistent display order
-	Meters.Sort([](const USagaMeterBase& A, const USagaMeterBase& B)
+	Meters.Sort([](const UMeterBase& A, const UMeterBase& B)
 	{
 		return A.GetClass()->GetName() < B.GetClass()->GetName();
 	});
@@ -429,15 +429,15 @@ TArray<USagaMeterBase*> USagaAbilitySystemComponent::GetAllMeters() const
 	return Meters;
 }
 
-FColor USagaAbilitySystemComponent::GetMeterNameColor(USagaMeterBase* Meter)
+FColor USGAbilitySystemComponent::GetMeterNameColor(UMeterBase* Meter)
 {
 	if (!Meter)
 	{
 		return FColor::White;
 	}
 
-	// 尝试转换为USagaDecreaseMeter以获取状态 / Try to cast to USagaDecreaseMeter to get state
-	if (const USagaDecreaseMeter* DecreaseMeter = Cast<USagaDecreaseMeter>(Meter))
+	// 尝试转换为UDecreaseMeter以获取状态 / Try to cast to UDecreaseMeter to get state
+	if (const UDecreaseMeter* DecreaseMeter = Cast<UDecreaseMeter>(Meter))
 	{
 		switch (DecreaseMeter->MeterState)
 		{
@@ -456,15 +456,15 @@ FColor USagaAbilitySystemComponent::GetMeterNameColor(USagaMeterBase* Meter)
 	return FColor::Green;
 }
 
-FColor USagaAbilitySystemComponent::GetMeterProgressBarColor(USagaMeterBase* Meter)
+FColor USGAbilitySystemComponent::GetMeterProgressBarColor(UMeterBase* Meter)
 {
 	if (!Meter)
 	{
 		return FColor::Green;
 	}
 
-	// 检查是否为USagaDecreaseMeter并处于免疫状态 / Check if it's USagaDecreaseMeter and in immune state
-	if (const USagaDecreaseMeter* DecreaseMeter = Cast<USagaDecreaseMeter>(Meter))
+	// 检查是否为UDecreaseMeter并处于免疫状态 / Check if it's UDecreaseMeter and in immune state
+	if (const UDecreaseMeter* DecreaseMeter = Cast<UDecreaseMeter>(Meter))
 	{
 		// 检查是否处于Reset状态且在免疫阈值内 / Check if in Reset state and within immune threshold
 		if (DecreaseMeter->MeterState == EMeterState::Reset)
@@ -484,7 +484,7 @@ FColor USagaAbilitySystemComponent::GetMeterProgressBarColor(USagaMeterBase* Met
 	return FColor::Green; // 绿色 / Green
 }
 
-void USagaAbilitySystemComponent::DrawMeterRecoveryInfo(UCanvas* Canvas, USagaMeterBase* Meter, FVector2D Position)
+void USGAbilitySystemComponent::DrawMeterRecoveryInfo(UCanvas* Canvas, UMeterBase* Meter, FVector2D Position)
 {
 	if (!Canvas || !Meter)
 	{
@@ -494,8 +494,8 @@ void USagaAbilitySystemComponent::DrawMeterRecoveryInfo(UCanvas* Canvas, USagaMe
 	FString RecoveryText;
 	bool bHasRecoveryInfo = false;
 
-	// 处理USagaDecreaseMeter的恢复信息 / Handle USagaDecreaseMeter recovery info
-	if (const USagaDecreaseMeter* DecreaseMeter = Cast<USagaDecreaseMeter>(Meter))
+	// 处理UDecreaseMeter的恢复信息 / Handle UDecreaseMeter recovery info
+	if (const UDecreaseMeter* DecreaseMeter = Cast<UDecreaseMeter>(Meter))
 	{
 		// 优先检查计时器状态 / Priority check timer states
 		if (DecreaseMeter->RegenerationCooldownTimer.IsValid())
@@ -542,8 +542,8 @@ void USagaAbilitySystemComponent::DrawMeterRecoveryInfo(UCanvas* Canvas, USagaMe
 			}
 		}
 	}
-	// 处理USagaIncreaseMeter的衰减信息 / Handle USagaIncreaseMeter degeneration info
-	else if (const USagaIncreaseMeter* IncreaseMeter = Cast<USagaIncreaseMeter>(Meter))
+	// 处理UIncreaseMeter的衰减信息 / Handle UIncreaseMeter degeneration info
+	else if (const UIncreaseMeter* IncreaseMeter = Cast<UIncreaseMeter>(Meter))
 	{
 		// 优先检查衰减冷却计时器 / Priority check degeneration cooldown timer
 		if (IncreaseMeter->DegenerationCooldownTimer.IsValid())
@@ -576,15 +576,15 @@ void USagaAbilitySystemComponent::DrawMeterRecoveryInfo(UCanvas* Canvas, USagaMe
 	}
 }
 
-FString USagaAbilitySystemComponent::GetMeterCDInfo(USagaMeterBase* Meter)
+FString USGAbilitySystemComponent::GetMeterCDInfo(UMeterBase* Meter)
 {
 	if (!Meter)
 	{
 		return FString();
 	}
 
-	// 处理USagaDecreaseMeter的CD信息 / Handle USagaDecreaseMeter CD info
-	if (const USagaDecreaseMeter* DecreaseMeter = Cast<USagaDecreaseMeter>(Meter))
+	// 处理UDecreaseMeter的CD信息 / Handle UDecreaseMeter CD info
+	if (const UDecreaseMeter* DecreaseMeter = Cast<UDecreaseMeter>(Meter))
 	{
 		// 优先检查计时器状态 / Priority check timer states
 		if (DecreaseMeter->RegenerationCooldownTimer.IsValid())
@@ -633,8 +633,8 @@ FString USagaAbilitySystemComponent::GetMeterCDInfo(USagaMeterBase* Meter)
 			}
 		}
 	}
-	// 处理USagaIncreaseMeter的CD信息 / Handle USagaIncreaseMeter CD info
-	else if (const USagaIncreaseMeter* IncreaseMeter = Cast<USagaIncreaseMeter>(Meter))
+	// 处理UIncreaseMeter的CD信息 / Handle UIncreaseMeter CD info
+	else if (const UIncreaseMeter* IncreaseMeter = Cast<UIncreaseMeter>(Meter))
 	{
 		// 优先检查衰减冷却计时器 / Priority check degeneration cooldown timer
 		if (IncreaseMeter->DegenerationCooldownTimer.IsValid())
@@ -661,7 +661,7 @@ FString USagaAbilitySystemComponent::GetMeterCDInfo(USagaMeterBase* Meter)
 	return FString(); // 返回空字符串表示没有CD信息 / Return empty string if no CD info
 }
 
-FString USagaAbilitySystemComponent::GetFormattedMeterName(USagaMeterBase* Meter)
+FString USGAbilitySystemComponent::GetFormattedMeterName(UMeterBase* Meter)
 {
 	if (!Meter)
 	{
@@ -684,7 +684,7 @@ FString USagaAbilitySystemComponent::GetFormattedMeterName(USagaMeterBase* Meter
 	}
 
 	// 添加状态指示器 / Add state indicators
-	if (const USagaDecreaseMeter* DecreaseMeter = Cast<USagaDecreaseMeter>(Meter))
+	if (const UDecreaseMeter* DecreaseMeter = Cast<UDecreaseMeter>(Meter))
 	{
 		switch (DecreaseMeter->MeterState)
 		{
@@ -733,7 +733,7 @@ FString USagaAbilitySystemComponent::GetFormattedMeterName(USagaMeterBase* Meter
 	return MeterName;
 }
 
-FString USagaAbilitySystemComponent::GetMeterAttributeInfo(USagaMeterBase* Meter)
+FString USGAbilitySystemComponent::GetMeterAttributeInfo(UMeterBase* Meter)
 {
 	if (!Meter)
 	{
@@ -744,8 +744,8 @@ FString USagaAbilitySystemComponent::GetMeterAttributeInfo(USagaMeterBase* Meter
 
 	// 删除Maximum和bClear字段显示 / Remove Maximum and bClear field display
 
-	// USagaDecreaseMeter特有属性 / USagaDecreaseMeter specific attributes
-	if (const USagaDecreaseMeter* DecreaseMeter = Cast<USagaDecreaseMeter>(Meter))
+	// UDecreaseMeter特有属性 / UDecreaseMeter specific attributes
+	if (const UDecreaseMeter* DecreaseMeter = Cast<UDecreaseMeter>(Meter))
 	{
 		AttributeStrings.Add(FString::Printf(TEXT("Regen: %.1f"), DecreaseMeter->GetRegeneration()));
 		AttributeStrings.Add(FString::Printf(TEXT("RegenCD: %.1f"), DecreaseMeter->GetRegenerationCooldown()));
@@ -753,8 +753,8 @@ FString USagaAbilitySystemComponent::GetMeterAttributeInfo(USagaMeterBase* Meter
 		AttributeStrings.Add(FString::Printf(TEXT("ResetRate: %.1f"), DecreaseMeter->GetResetRate()));
 		AttributeStrings.Add(FString::Printf(TEXT("ImmuneThresh: %.1f"), DecreaseMeter->GetImmuneThreshold()));
 	}
-	// USagaIncreaseMeter特有属性 / USagaIncreaseMeter specific attributes
-	else if (const USagaIncreaseMeter* IncreaseMeter = Cast<USagaIncreaseMeter>(Meter))
+	// UIncreaseMeter特有属性 / UIncreaseMeter specific attributes
+	else if (const UIncreaseMeter* IncreaseMeter = Cast<UIncreaseMeter>(Meter))
 	{
 		AttributeStrings.Add(FString::Printf(TEXT("Degen: %.1f"), IncreaseMeter->GetDegeneration()));
 		AttributeStrings.Add(FString::Printf(TEXT("DegenCD: %.1f"), IncreaseMeter->GetDegenerationCooldown()));
@@ -764,7 +764,7 @@ FString USagaAbilitySystemComponent::GetMeterAttributeInfo(USagaMeterBase* Meter
 	return FString::Join(AttributeStrings, TEXT(", "));
 }
 
-void USagaAbilitySystemComponent::DrawMeterAttributeInfo(UCanvas* Canvas, USagaMeterBase* Meter, FVector2D Position, float MaxWidth)
+void USGAbilitySystemComponent::DrawMeterAttributeInfo(UCanvas* Canvas, UMeterBase* Meter, FVector2D Position, float MaxWidth)
 {
 	if (!Canvas || !Meter)
 	{
@@ -777,8 +777,8 @@ void USagaAbilitySystemComponent::DrawMeterAttributeInfo(UCanvas* Canvas, USagaM
 	//获取选中状态颜色
 	auto GetAttributeDrawColor = [](bool Condition){return Condition ? FColor::Cyan: FColor::White;};
 	
-	// USagaDecreaseMeter特有属性 / USagaDecreaseMeter specific attributes
-	if (const USagaDecreaseMeter* DecreaseMeter = Cast<USagaDecreaseMeter>(Meter))
+	// UDecreaseMeter特有属性 / UDecreaseMeter specific attributes
+	if (const UDecreaseMeter* DecreaseMeter = Cast<UDecreaseMeter>(Meter))
 	{
 		AttributeStrings.Add(TPair<FString, FColor>(FString::Printf(TEXT("Regen: %.1f"), DecreaseMeter->GetRegeneration()), GetAttributeDrawColor(DecreaseMeter->MeterState == EMeterState::Normal && DecreaseMeter->CanRegeneration())));
 		AttributeStrings.Add(TPair<FString, FColor>(FString::Printf(TEXT("RegenCD: %.1f"), DecreaseMeter->GetRegenerationCooldown()), GetAttributeDrawColor(DecreaseMeter->MeterState == EMeterState::Normal && DecreaseMeter->RegenerationCooldownTimer.IsValid())));
@@ -792,8 +792,8 @@ void USagaAbilitySystemComponent::DrawMeterAttributeInfo(UCanvas* Canvas, USagaM
 		// 高亮ImmuneThreshold字段 / Highlight ImmuneThreshold field
 		AttributeStrings.Add(TPair<FString, FColor>(FString::Printf(TEXT("ImmuneThresh: %.1f"), DecreaseMeter->GetImmuneThreshold()), GetAttributeDrawColor(DecreaseMeter->IsInResetImmune())));
 	}
-	// USagaIncreaseMeter特有属性 / USagaIncreaseMeter specific attributes
-	else if (const USagaIncreaseMeter* IncreaseMeter = Cast<USagaIncreaseMeter>(Meter))
+	// UIncreaseMeter特有属性 / UIncreaseMeter specific attributes
+	else if (const UIncreaseMeter* IncreaseMeter = Cast<UIncreaseMeter>(Meter))
 	{
 		AttributeStrings.Add(TPair<FString, FColor>(FString::Printf(TEXT("Degen: %.1f"), IncreaseMeter->GetDegeneration()), GetAttributeDrawColor(IncreaseMeter->CanDegeneration())));
 		AttributeStrings.Add(TPair<FString, FColor>(FString::Printf(TEXT("DegenCD: %.1f"), IncreaseMeter->GetDegenerationCooldown()), GetAttributeDrawColor(IncreaseMeter->DegenerationCooldownTimer.IsValid())));
@@ -842,7 +842,7 @@ void USagaAbilitySystemComponent::DrawMeterAttributeInfo(UCanvas* Canvas, USagaM
 	}
 }
 
-void USagaAbilitySystemComponent::DrawMultiColorLine(UCanvas* Canvas, float StartX, float YPos, const TArray<TPair<FString, FColor>>& ColoredTexts, UFont* Font)
+void USGAbilitySystemComponent::DrawMultiColorLine(UCanvas* Canvas, float StartX, float YPos, const TArray<TPair<FString, FColor>>& ColoredTexts, UFont* Font)
 {
 	if (!Canvas || !Font || ColoredTexts.Num() == 0)
 	{

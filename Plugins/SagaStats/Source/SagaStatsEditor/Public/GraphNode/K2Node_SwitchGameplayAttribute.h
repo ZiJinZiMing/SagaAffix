@@ -9,13 +9,13 @@
 #include "AttributeSet.h"
 #include "EdGraph/EdGraphPin.h"
 #include "K2Node_Switch.h"
-#include "SagaK2Node_SwitchGameplayAttribute.generated.h"
+#include "K2Node_SwitchGameplayAttribute.generated.h"
 
 /**
- * Switch Switch on Gameplay Attribute node
+ * Switch on Gameplay Attribute node
  */
 UCLASS(MinimalAPI)
-class USagaK2Node_SwitchGameplayAttribute : public UK2Node_Switch
+class UK2Node_SwitchGameplayAttribute : public UK2Node_Switch
 {
 	GENERATED_UCLASS_BODY()
 

@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Blueprint.h"
-#include "SagaAttributeSetBlueprint.generated.h"
+#include "SGAttributeSetBlueprint.generated.h"
 
 /**
  * A Gameplay Blueprint Attribute Set is essentially a specialized Blueprint whose graphs control a GAS Attribute Set.
@@ -22,12 +22,12 @@
  * from each other. You could make a base health set, then have a player set that inherits from it and adds more attributes.
  */
 UCLASS(BlueprintType)
-class SAGASTATS_API USagaAttributeSetBlueprint : public UBlueprint
+class SAGASTATS_API USGAttributeSetBlueprint : public UBlueprint
 {
 	GENERATED_BODY()
 
 public:
-	virtual ~USagaAttributeSetBlueprint() override;
+	virtual ~USGAttributeSetBlueprint() override;
 
 #if WITH_EDITOR
 	//~ Begin UBlueprint interface
@@ -48,8 +48,8 @@ public:
 	void HandleVariableChanges(const UBlueprint* InBlueprint);
 	void OnPostVariableChange(UBlueprint* InBlueprint) const;
 	void OnPostCompiled(UBlueprint* InBlueprint);
-	static void OnVariableAdded(const FName& Name);
-	static void OnVariableRemoved(const FName& Name);
+	void OnVariableAdded(const FName& Name) const;
+	void OnVariableRemoved(const FName& Name) const;
 	void OnVariableRenamed(const FName& InOldVarName, const FName& InNewVarName) const;
 	void OnVariableTypeChanged(const FName& InVarName, const FEdGraphPinType& InOldPinType, const FEdGraphPinType& InNewPinType) const;
 #endif

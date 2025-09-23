@@ -7,9 +7,9 @@
 
 #include "Meter/Async/AbilityAsync_WaitMeterFilled.h"
 
-#include "SagaAbilitySystemComponent.h"
+#include "SGAbilitySystemComponent.h"
 
-UAbilityAsync_WaitMeterFilled* UAbilityAsync_WaitMeterFilled::WaitMeterFilled(AActor* TargetActor, TSubclassOf<USagaMeterBase> MeterClass)
+UAbilityAsync_WaitMeterFilled* UAbilityAsync_WaitMeterFilled::WaitMeterFilled(AActor* TargetActor, TSubclassOf<UMeterBase> MeterClass)
 {
 	UAbilityAsync_WaitMeterFilled* Async = NewObject<UAbilityAsync_WaitMeterFilled>();
 	Async->SetAbilityActor(TargetActor);
@@ -20,7 +20,7 @@ UAbilityAsync_WaitMeterFilled* UAbilityAsync_WaitMeterFilled::WaitMeterFilled(AA
 void UAbilityAsync_WaitMeterFilled::Activate()
 {
 	Super::Activate();
-	if(USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponent()))
+	if(USGAbilitySystemComponent* ASC = Cast<USGAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		MeterFilledHandle = ASC->GetMeterFilledDelegate(MeterClass).AddUObject(this,&ThisClass::OnMeterFilledCallback);
 	}else
@@ -31,14 +31,14 @@ void UAbilityAsync_WaitMeterFilled::Activate()
 
 void UAbilityAsync_WaitMeterFilled::EndAction()
 {
-	if(USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponent()))
+	if(USGAbilitySystemComponent* ASC = Cast<USGAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		ASC->GetMeterFilledDelegate(MeterClass).Remove(MeterFilledHandle);
 	}
 	Super::EndAction();
 }
 
-void UAbilityAsync_WaitMeterFilled::OnMeterFilledCallback(USagaMeterBase* Meter)
+void UAbilityAsync_WaitMeterFilled::OnMeterFilledCallback(UMeterBase* Meter)
 {
 	OnFilled.Broadcast(Meter);
 }

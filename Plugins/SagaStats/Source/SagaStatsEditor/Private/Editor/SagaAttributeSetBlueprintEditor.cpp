@@ -7,9 +7,9 @@
 
 #include "AttributeSet.h"
 #include "EdGraphSchema_K2.h"
-#include "SagaStatsDelegates.h"
+#include "SGDelegates.h"
 #include "SSEditorLog.h"
-#include "AttributeSet/SagaAttributeSetBlueprint.h"
+#include "AttributeSet/SGAttributeSetBlueprint.h"
 #include "Details/Slate/SSNewAttributeViewModel.h"
 #include "Details/Slate/SSSNewAttributeVariableWidget.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -46,7 +46,7 @@ void FSagaAttributeSetBlueprintEditor::InitAttributeSetEditor(const EToolkitMode
 
 	if (InBlueprints.IsValidIndex(0))
 	{
-		if (USagaAttributeSetBlueprint* Blueprint = Cast<USagaAttributeSetBlueprint>(InBlueprints[0]))
+		if (USGAttributeSetBlueprint* Blueprint = Cast<USGAttributeSetBlueprint>(InBlueprints[0]))
 		{
 			Blueprint->RegisterDelegates();
 		}
@@ -62,7 +62,7 @@ void FSagaAttributeSetBlueprintEditor::Compile()
 	{
 		if (const UPackage* Package = Blueprint->GetPackage())
 		{
-			FSagaStatsDelegates::OnPreCompile.Broadcast(Package->GetFName());
+			FSGDelegates::OnPreCompile.Broadcast(Package->GetFName());
 		}
 	}
 	

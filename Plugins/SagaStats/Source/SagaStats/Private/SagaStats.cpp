@@ -6,7 +6,7 @@
 
 #include "SagaStats.h"
 
-#include "SagaAbilitySystemComponent.h"
+#include "SGAbilitySystemComponent.h"
 #include "GameFramework/HUD.h"
 
 #define LOCTEXT_NAMESPACE "FSagaStatsModule"
@@ -17,7 +17,7 @@ void FSagaStatsModule::StartupModule()
 
 	if (!IsRunningDedicatedServer())
 	{
-		AHUD::OnShowDebugInfo.AddStatic(&USagaAbilitySystemComponent::OnShowMeterDebugInfo);
+		AHUD::OnShowDebugInfo.AddStatic(&USGAbilitySystemComponent::OnShowMeterDebugInfo);
 	}
 }
 

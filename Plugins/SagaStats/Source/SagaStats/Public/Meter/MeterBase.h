@@ -10,14 +10,14 @@
 #include "VisualLogger/VisualLogger.h"
 #include "AbilitySystemComponent.h"
 #include "TickableAttributeSetInterface.h"
-#include "AttributeSet/SagaAttributeSet.h"
-#include "SagaMeterBase.generated.h"
+#include "AttributeSet/SGAttributeSet.h"
+#include "MeterBase.generated.h"
 
 #define METER_MINIMUM 0
 
 
 /**
- * @class USagaMeterBase
+ * @class UMeterBase
  * @brief 通用的计量条属性集基类 (The base AttributeSet for meters like Health, Mana, etc.).
  *
  * @details
@@ -44,22 +44,22 @@
  * 2. 在该类的蓝图或C++子类中实现 OnAccumulate / OnReduce 事件，以定义如何根据输入值最终修改 Current 值。
  *    Implement the OnAccumulate / OnReduce events in a Blueprint or C++ subclass to define how the Current value is ultimately modified based on the input.
  *
- * @see USagaIncreaseMeter, USagaDecreaseMeter
+ * @see UIncreaseMeter, UDecreaseMeter
  */
 UCLASS(Abstract, meta = (HideInDetailsView))
-class SAGASTATS_API USagaMeterBase : public USagaAttributeSet, public ITickableAttributeSetInterface
+class SAGASTATS_API UMeterBase : public USGAttributeSet, public ITickableAttributeSetInterface
 {
 	GENERATED_BODY()
 
 public:
-	USagaMeterBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UMeterBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	SAGA_ATTRIBUTE_ACCESSORS(Current);
 	/*Current value of meter*/
 	UPROPERTY(EditDefaultsOnly, Category="Meter", ReplicatedUsing=OnRep_Current, meta=(HideFromModifiers))
-	FSagaClampedGameplayAttributeData Current;
+	FSGClampedGameplayAttributeData Current;
 	UFUNCTION()
-	void OnRep_Current(const FSagaClampedGameplayAttributeData& OldValue)
+	void OnRep_Current(const FSGClampedGameplayAttributeData& OldValue)
 	{
 		SAGA_GAMEPLAYATTRIBUTE_REPNOTIFY(Current, OldValue);
 	}
@@ -101,7 +101,7 @@ public:
 	static bool LessOrNearlyEqual(float A, float B);
 
 	UFUNCTION(BlueprintCallable, Category="Meter")
-	static const USagaMeterBase* GetMeter(AActor* Actor, TSubclassOf<USagaMeterBase> MeterClass);
+	static const UMeterBase* GetMeter(AActor* Actor, TSubclassOf<UMeterBase> MeterClass);
 
 	UFUNCTION(BlueprintPure, Category="Meter")
 	bool IsFilled() const;
@@ -139,12 +139,12 @@ protected:
 	virtual void OnCurrentChanged(float OldValue, float NewValue);
 
 	UFUNCTION(BlueprintNativeEvent)
-	void OnAccumulate(const FSagaAttributeSetExecutionData& Data);
-	virtual void OnAccumulate_Implementation(const FSagaAttributeSetExecutionData& Data);
+	void OnAccumulate(const FSGAttributeSetExecutionData& Data);
+	virtual void OnAccumulate_Implementation(const FSGAttributeSetExecutionData& Data);
 
 	UFUNCTION(BlueprintNativeEvent)
-	void OnReduce(const FSagaAttributeSetExecutionData& Data);
-	virtual void OnReduce_Implementation(const FSagaAttributeSetExecutionData& Data);
+	void OnReduce(const FSGAttributeSetExecutionData& Data);
+	virtual void OnReduce_Implementation(const FSGAttributeSetExecutionData& Data);
 
 	/** Called after an Accumulate effect has been executed. */
 	virtual void PostAccumulate();
@@ -154,7 +154,7 @@ protected:
 
 	/**/
 	UFUNCTION(BlueprintCallable)
-	virtual void PostDamageProcess(float CurrentValue, float PrevCurrentValue, const FSagaAttributeSetExecutionData& Data);
+	virtual void PostDamageProcess(float CurrentValue, float PrevCurrentValue, const FSGAttributeSetExecutionData& Data);
 
 	//~begin ITickableAttributeSetInterface interface
 

@@ -5,28 +5,28 @@
 ******************************************************************************************/
 
 
-#include "Meter/SagaIncreaseMeter.h"
+#include "Meter/IncreaseMeter.h"
 
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 
-USagaIncreaseMeter::USagaIncreaseMeter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
+UIncreaseMeter::UIncreaseMeter(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
 	InitDegeneration(0.f);
 	InitDegenerationCooldown(0.f);
 }
 
-void USagaIncreaseMeter::InitFromMetaDataTable(const UDataTable* DataTable)
+void UIncreaseMeter::InitFromMetaDataTable(const UDataTable* DataTable)
 {
 	Super::InitFromMetaDataTable(DataTable);
 }
 
-void USagaIncreaseMeter::OnAccumulate_Implementation(const FSagaAttributeSetExecutionData& Data)
+void UIncreaseMeter::OnAccumulate_Implementation(const FSGAttributeSetExecutionData& Data)
 {
 	Super::OnAccumulate_Implementation(Data);
 }
 
-void USagaIncreaseMeter::PostAccumulate()
+void UIncreaseMeter::PostAccumulate()
 {
 	Super::PostAccumulate();
 
@@ -38,7 +38,7 @@ void USagaIncreaseMeter::PostAccumulate()
 }
 
 
-void USagaIncreaseMeter::Tick(float DeltaTime)
+void UIncreaseMeter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -52,20 +52,20 @@ void USagaIncreaseMeter::Tick(float DeltaTime)
 	}
 }
 
-void USagaIncreaseMeter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void UIncreaseMeter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME_CONDITION_NOTIFY(USagaIncreaseMeter, Degeneration, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(USagaIncreaseMeter, DegenerationCooldown, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UIncreaseMeter, Degeneration, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UIncreaseMeter, DegenerationCooldown, COND_None, REPNOTIFY_Always);
 }
 
-bool USagaIncreaseMeter::CanDegeneration() const
+bool UIncreaseMeter::CanDegeneration() const
 {
 	return GetDegeneration() > 0 && !DegenerationCooldownTimer.IsValid();
 }
 
-void USagaIncreaseMeter::OnDegenerationCooldownTimerFinish()
+void UIncreaseMeter::OnDegenerationCooldownTimerFinish()
 {
 	DegenerationCooldownTimer.Invalidate();
 

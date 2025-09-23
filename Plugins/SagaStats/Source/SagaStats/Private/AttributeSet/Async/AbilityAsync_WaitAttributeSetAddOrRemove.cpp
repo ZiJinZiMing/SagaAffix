@@ -7,7 +7,7 @@
 
 #include "AttributeSet/Async/AbilityAsync_WaitAttributeSetAddOrRemove.h"
 
-#include "SagaAbilitySystemComponent.h"
+#include "SGAbilitySystemComponent.h"
 
 UAbilityAsync_WaitAttributeSetAddOrRemove* UAbilityAsync_WaitAttributeSetAddOrRemove::WaitAttributeSetAddOrRemove(AActor* TargetActor, TSubclassOf<UAttributeSet> SetClass,bool TriggerAddWhenActive)
 {
@@ -21,7 +21,7 @@ UAbilityAsync_WaitAttributeSetAddOrRemove* UAbilityAsync_WaitAttributeSetAddOrRe
 void UAbilityAsync_WaitAttributeSetAddOrRemove::Activate()
 {
 	Super::Activate();
-	if(USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponent()))
+	if(USGAbilitySystemComponent* ASC = Cast<USGAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		AttributeSetAddOrRemoveHandle = ASC->GetAttributeSetAddOrRemoveDelegate(SetClass).AddUObject(this,&ThisClass::OnAttributeSetAddOrRemoveCallback);
 		if (TriggerAddWhenActive)
@@ -39,7 +39,7 @@ void UAbilityAsync_WaitAttributeSetAddOrRemove::Activate()
 
 void UAbilityAsync_WaitAttributeSetAddOrRemove::EndAction()
 {
-	if(USagaAbilitySystemComponent* ASC = Cast<USagaAbilitySystemComponent>(GetAbilitySystemComponent()))
+	if(USGAbilitySystemComponent* ASC = Cast<USGAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		ASC->GetAttributeSetAddOrRemoveDelegate(SetClass).Remove(AttributeSetAddOrRemoveHandle);
 	}

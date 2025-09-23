@@ -52,9 +52,9 @@ const TArray<FText>& FSagaAssetTypeActions_AttributeSet::GetSubMenus() const
 
 UFactory* FSagaAssetTypeActions_AttributeSet::GetFactoryForBlueprintType(UBlueprint* InBlueprint) const
 {
-	check(InBlueprint && InBlueprint->IsA(USagaAttributeSetBlueprint::StaticClass()));
+	check(InBlueprint && InBlueprint->IsA(USGAttributeSetBlueprint::StaticClass()));
 	USagaBlueprintFactory* Factory = NewObject<USagaBlueprintFactory>();
-	Factory->ParentClass = TSubclassOf<USagaAttributeSet>(*InBlueprint->GeneratedClass);
+	Factory->ParentClass = TSubclassOf<USGAttributeSet>(*InBlueprint->GeneratedClass);
 	return Factory;
 }
 
