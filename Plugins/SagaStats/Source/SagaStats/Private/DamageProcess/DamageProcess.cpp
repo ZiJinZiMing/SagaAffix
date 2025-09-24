@@ -1,4 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿/***************************************************************************************************************
+* Plugin:       SagaStats
+* Author:       Jinming Zhang
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "DamageProcess/DamageProcess.h"

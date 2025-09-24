@@ -1,24 +1,25 @@
-﻿/******************************************************************************
-* ProjectName:  SagaStats
+﻿/***************************************************************************************************************
+* Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 
 #include "SagaStatsEditor.h"
 #include "AssetToolsModule.h"
-#include "SSEditorLog.h"
+#include "SGEditorLog.h"
 #include "PropertyEditorModule.h"
-#include "SagaEditorSubsystem.h"
+#include "SGEditorSubsystem.h"
 #include "AssetRegistry/AssetRegistryModule.h"
-#include "AssetTypes/SagaAssetTypeActions_AttributeSet.h"
-#include "Details/SagaAttributeSetDetails.h"
-#include "Details/SagaAttributeDataClampedDetails.h"
-#include "Details/SagaGameplayAttributeDataDetails.h"
-#include "Details/SagaGameplayAttributeDetails.h"
-#include "Editor/SSGraphPanelPinFactory.h"
+#include "AssetTypes/SGAssetTypeActions_AttributeSet.h"
+#include "AttributeReferenceViewer/SGAttributeListReferenceViewer.h"
+#include "Details/SGAttributeSetDetails.h"
+#include "Details/SGAttributeDataClampedDetails.h"
+#include "Details/SGGameplayAttributeDataDetails.h"
+#include "Details/SGGameplayAttributeDetails.h"
+#include "Editor/SGGraphPanelPinFactory.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/EngineVersionComparison.h"
-#include "ReferencerHandlers/FSSSwitchNodeReferencerHandler.h"
+#include "ReferencerHandlers/FSGSwitchNodeReferencerHandler.h"
 #define LOCTEXT_NAMESPACE "FSagaStatsEditorModule"
 
 void FSagaStatsEditorModule::StartupModule()
@@ -31,8 +32,9 @@ void FSagaStatsEditorModule::StartupModule()
 	//
 	// Registering ours earlier so that editor considers it before evaluating the default one (we need to expose Attributes added in BP for K2 Nodes)
 	//
-	SS_EDITOR_LOG(Verbose, TEXT("FSagaStatsEditorModule::StartupModule"))
-
+	SG_EDITOR_LOG(Verbose, TEXT("FSagaStatsEditorModule::StartupModule"))
+	
+	RegisterConsoleCommands();
 
 	// Every other logic that would have happened in here is delayed to OnPostEngineInit
 	FCoreDelegates::OnPostEngineInit.AddRaw(this, &FSagaStatsEditorModule::OnPostEngineInit);
@@ -40,16 +42,17 @@ void FSagaStatsEditorModule::StartupModule()
 	// Register factories for pins and nodes
 	//
 	// That is for K2 nodes with FGameplayAttribute pins, like GetFloatAttributeBase from ASC
-	GameplayAbilitiesGraphPanelPinFactory = MakeShared<FSSGraphPanelPinFactory>();
+	GameplayAbilitiesGraphPanelPinFactory = MakeShared<FSGGraphPanelPinFactory>();
 	FEdGraphUtilities::RegisterVisualPinFactory(GameplayAbilitiesGraphPanelPinFactory);
 }
 
 void FSagaStatsEditorModule::ShutdownModule()
 {
-	SS_EDITOR_LOG(Verbose, TEXT("FSagaStatsEditorModule::ShutdownModule"))
+	SG_EDITOR_LOG(Verbose, TEXT("FSagaStatsEditorModule::ShutdownModule"))
 
 	FCoreDelegates::OnPostEngineInit.RemoveAll(this);
 	
+	UnregisterConsoleCommands();
 
 	// Unregister customizations
 	if (FModuleManager::Get().IsModuleLoaded(TEXT("PropertyEditor")))
@@ -85,13 +88,13 @@ void FSagaStatsEditorModule::ShutdownModule()
 
 	if (GEditor)
 	{
-		USagaEditorSubsystem::Get().UnregisterReferencerHandler(TEXT("SagaK2Node_SwitchGameplayAttribute"));
+		USGEditorSubsystem::Get().UnregisterReferencerHandler(TEXT("K2Node_SwitchGameplayAttribute"));
 	}
 }
 
 void FSagaStatsEditorModule::PreloadAssetsByClass(UClass* InClass) const
 {
-	SS_EDITOR_LOG(Verbose, TEXT("FSagaStatsEditorModule::PreloadAssetsByClass - Preloading assets with class %s"), *GetNameSafe(InClass))
+	SG_EDITOR_NS_LOG(Verbose, TEXT("Preloading assets with class %s"), *GetNameSafe(InClass))
 	if (!InClass)
 	{
 		return;
@@ -106,10 +109,10 @@ void FSagaStatsEditorModule::PreloadAssetsByClass(UClass* InClass) const
 	AssetRegistry.GetAssetsByClass(InClass->GetFName(), Assets, true);
 #endif
 
-	SS_EDITOR_LOG(Verbose, TEXT("FSagaStatsEditorModule::PreloadAssetsByClass - Preloading %d assets with class %s"), Assets.Num(), *GetNameSafe(InClass))
+	SG_EDITOR_NS_LOG(Verbose, TEXT("Preloading %d assets with class %s"), Assets.Num(), *GetNameSafe(InClass))
 	for (const FAssetData& Asset : Assets)
 	{
-		SS_EDITOR_LOG(Verbose, TEXT("\nFSagaStatsEditorModule::PreloadAssetsByClass Preload asset PackageName: %s"), *Asset.PackageName.ToString())
+		SG_EDITOR_NS_LOG(Verbose, TEXT("\nPreload asset PackageName: %s"), *Asset.PackageName.ToString())
 		if (!Asset.IsAssetLoaded())
 		{
 			Asset.GetAsset();
@@ -128,25 +131,25 @@ void FSagaStatsEditorModule::OnPostEngineInit()
 		PropertyModule.UnregisterCustomPropertyTypeLayout("GameplayAttribute");
 
 		// And register our own customizations
-		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("GameplayAttribute"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSagaGameplayAttributeDetails::MakeInstance));
-		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("GameplayAttributeData"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSagaGameplayAttributeDataDetails::MakeInstance));
-		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("SGClampedGameplayAttributeData"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSagaAttributeDataClampedDetails::MakeInstance));
+		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("GameplayAttribute"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSGGameplayAttributeDetails::MakeInstance));
+		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("GameplayAttributeData"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSGGameplayAttributeDataDetails::MakeInstance));
+		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("SGClampedGameplayAttributeData"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSGAttributeDataClampedDetails::MakeInstance));
 		
-		PropertyModule.RegisterCustomClassLayout(TEXT("SGAttributeSet"), FOnGetDetailCustomizationInstance::CreateStatic(&FSagaAttributeSetDetails::MakeInstance));
+		PropertyModule.RegisterCustomClassLayout(TEXT("SGAttributeSet"), FOnGetDetailCustomizationInstance::CreateStatic(&FSGAttributeSetDetails::MakeInstance));
 
 		// Asset Types
 		{
 			IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get();
 
 			constexpr EAssetTypeCategories::Type AssetCategory = EAssetTypeCategories::Gameplay;
-			SS_EDITOR_LOG(Verbose, TEXT("FSagaStatsEditorModule::RegisterAssetTypeAction FSagaAssetTypeActions_AttributeSet"))
-			RegisterAssetTypeAction(AssetTools, MakeShared<FSagaAssetTypeActions_AttributeSet>(AssetCategory));
+			SG_EDITOR_NS_LOG(Verbose, TEXT("FSGAssetTypeActions_AttributeSet"))
+			RegisterAssetTypeAction(AssetTools, MakeShared<FSGAssetTypeActions_AttributeSet>(AssetCategory));
 		}
 	}
 
 	if (GEditor)
 	{
-		USagaEditorSubsystem::Get().RegisterReferencerHandler(TEXT("SagaK2Node_SwitchGameplayAttribute"), FSSSwitchNodeReferencerHandler::Create());
+		USGEditorSubsystem::Get().RegisterReferencerHandler(TEXT("K2Node_SwitchGameplayAttribute"), FSGSwitchNodeReferencerHandler::Create());
 	}
 }
 
@@ -156,6 +159,82 @@ void FSagaStatsEditorModule::RegisterAssetTypeAction(class IAssetTools& AssetToo
 	AssetTools.RegisterAssetTypeActions(Action);
 	CreatedAssetTypeActions.Add(Action);
 }
+
+
+void FSagaStatsEditorModule::RegisterConsoleCommands()
+{
+	
+	/* todo:子属性引用存在Bug
+	ConsoleCommands.Add(IConsoleManager::Get().RegisterConsoleCommand(
+		TEXT("Attribute.ReferenceList"),
+		TEXT("Display Attribute references dialog"),
+		FConsoleCommandWithArgsDelegate::CreateRaw(this, &FSagaStatsEditorModule::ExecuteShowGameplayAttributeReferencesWindow),
+		ECVF_Default
+	));
+	*/
+	
+}
+
+void FSagaStatsEditorModule::UnregisterConsoleCommands()
+{
+	for (IConsoleCommand* ConsoleCommand : ConsoleCommands)
+	{
+		IConsoleManager::Get().UnregisterConsoleObject(ConsoleCommand);
+	}
+
+	ConsoleCommands.Empty();
+}
+
+
+void FSagaStatsEditorModule::ExecuteShowGameplayAttributeReferencesWindow(const TArray<FString>& InArgs)
+{
+	const FString Argv = FString::Join(InArgs, TEXT(" "));
+
+	SG_EDITOR_NS_LOG(Verbose, TEXT("Start command - Search for %s"), *Argv)
+
+	const FVector2D WindowSize(800, 800);
+
+	AttributeListReferenceViewerWidget = SNew(SSGAttributeListReferenceViewer);
+	const FText Title = LOCTEXT("AttributeListReferenceViewer_Title", "Attribute Reference Viewer");
+
+	AttributeListReferenceViewerWindow = SNew(SWindow)
+		.Title(Title)
+		.HasCloseButton(true)
+		.SupportsMaximize(false)
+		.SupportsMinimize(false)
+		.AutoCenter(EAutoCenter::PreferredWorkArea)
+		.ClientSize(WindowSize)
+		[
+			SNew(SBorder)
+			.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+			[
+				SNew(SVerticalBox)
+
+				+ SVerticalBox::Slot()
+				.FillHeight(1)
+				[
+					AttributeListReferenceViewerWidget.ToSharedRef()
+				]
+			]
+		];
+
+	// NOTE: FGlobalTabmanager::Get()-> is actually dereferencing a SharedReference, not a SharedPtr, so it cannot be null.
+	if (FGlobalTabmanager::Get()->GetRootWindow().IsValid())
+	{
+		FSlateApplication::Get().AddWindowAsNativeChild(AttributeListReferenceViewerWindow.ToSharedRef(), FGlobalTabmanager::Get()->GetRootWindow().ToSharedRef());
+	}
+	else
+	{
+		FSlateApplication::Get().AddWindow(AttributeListReferenceViewerWindow.ToSharedRef());
+	}
+
+	check(AttributeListReferenceViewerWidget.IsValid());
+
+	// Set focus to the search box on creation
+	FSlateApplication::Get().SetKeyboardFocus(AttributeListReferenceViewerWidget->GetWidgetToFocusOnOpen());
+	FSlateApplication::Get().SetUserFocus(0, AttributeListReferenceViewerWidget->GetWidgetToFocusOnOpen());
+}
+
 
 #undef LOCTEXT_NAMESPACE
     

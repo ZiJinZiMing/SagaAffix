@@ -1,8 +1,8 @@
-/******************************************************************************
-* ProjectName:  SagaStats
+/***************************************************************************************************************
+* Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 
 #include "SagaStats.h"
 

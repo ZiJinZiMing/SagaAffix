@@ -1,3 +1,8 @@
+/***************************************************************************************************************
+* Plugin:       SagaStats
+* Author:       Jinming Zhang
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 
 #include "DamageProcess/DAG/DAGNode.h"
 // 构造函数：初始化节点状态和ID / Constructor: Initialize node state and ID

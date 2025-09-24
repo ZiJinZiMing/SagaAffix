@@ -23,7 +23,7 @@
 		{
 			"Name": "SagaStatsEditor",
 			"Type": "UncookedOnly",
-			"LoadingPhase": "PreDefault"
+			"LoadingPhase": "PreLoadingScreen"
 		}
 	],
 	"Plugins": [

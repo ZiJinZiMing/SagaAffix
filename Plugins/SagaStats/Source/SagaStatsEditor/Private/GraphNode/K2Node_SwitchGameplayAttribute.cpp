@@ -1,13 +1,14 @@
-/******************************************************************************************
+/***************************************************************************************************************
 * Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 #include "GraphNode/K2Node_SwitchGameplayAttribute.h"
 
 #include "BlueprintActionDatabaseRegistrar.h"
 #include "BlueprintNodeSpawner.h"
 #include "EdGraphSchema_K2.h"
+#include "SGUtils.h"
 #include "AttributeSet/SGBlueprintLibrary.h"
 #include "Engine/Blueprint.h"
 #include "Interfaces/IPluginManager.h"
@@ -71,12 +72,12 @@ void UK2Node_SwitchGameplayAttribute::PostEditChangeProperty(FPropertyChangedEve
 
 FText UK2Node_SwitchGameplayAttribute::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	return NSLOCTEXT("K2Node", "SagaK2Node_Switch_GameplayAttribute", "Switch on Gameplay Attribute");
+	return NSLOCTEXT("K2Node", "K2Node_SwitchGameplayAttribute", "Switch on Gameplay Attribute");
 }
 
 FText UK2Node_SwitchGameplayAttribute::GetTooltipText() const
 {
-	return NSLOCTEXT("K2Node", "SagaK2Node_SwitchGameplayAttribute_ToolTip", "Selects an output that matches the input gameplay attribute value");
+	return NSLOCTEXT("K2Node", "K2Node_SwitchGameplayAttribute_ToolTip", "Selects an output that matches the input gameplay attribute value");
 }
 
 void UK2Node_SwitchGameplayAttribute::GetMenuActions(FBlueprintActionDatabaseRegistrar& ActionRegistrar) const
@@ -169,7 +170,7 @@ void UK2Node_SwitchGameplayAttribute::CreateCasePins()
 		if (PinAttributes[Index].IsValid())
 		{
 			FGameplayAttribute Attribute = PinAttributes[Index];
-			FString FriendlyName = Attribute.GetAttributeSetClass()->GetName() + "." + Attribute.GetName();
+			FString FriendlyName = FSGUtils::GetAttributeClassName(Attribute.GetAttributeSetClass())  + "." + Attribute.GetName();
 			NewPin->PinFriendlyName = FText::FromString(FriendlyName);
 		}
 		else

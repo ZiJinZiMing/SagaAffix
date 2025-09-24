@@ -1,8 +1,8 @@
-/******************************************************************************************
+/***************************************************************************************************************
 * Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 #pragma once
 
 #include "AttributeSet/SGAttributeSetBlueprint.h"
@@ -162,7 +162,7 @@ void USGAttributeSetBlueprint::OnVariableAdded(const FName& Name) const
 		SG_NS_LOG(Warning, TEXT("SelfPackage nullptr"))
 		return;
 	}
-	FSGDelegates::OnVariableAdded.Broadcast(Name);
+	FSGDelegates::OnVariableAdded.Broadcast(Package->GetFName(),Name);
 }
 
 void USGAttributeSetBlueprint::OnVariableRemoved(const FName& Name) const
@@ -174,7 +174,7 @@ void USGAttributeSetBlueprint::OnVariableRemoved(const FName& Name) const
 		SG_NS_LOG(Warning, TEXT("SelfPackage nullptr"))
 		return;
 	}
-	FSGDelegates::OnVariableRemoved.Broadcast(Name);
+	FSGDelegates::OnVariableRemoved.Broadcast(Package->GetFName(),Name);
 }
 
 void USGAttributeSetBlueprint::OnVariableRenamed(const FName& InOldVarName, const FName& InNewVarName) const

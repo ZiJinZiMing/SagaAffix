@@ -1,8 +1,8 @@
-/******************************************************************************
-* ProjectName:  SagaStats
+/***************************************************************************************************************
+* Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 
 #include "AttributeSet/SGAttributeSet.h"
 
@@ -638,14 +638,14 @@ EDataValidationResult USGAttributeSet::IsDataValidBlueprintEditor(TArray<FText>&
 	SG_LOG(Verbose, TEXT("USGAttributeSet::IsDataValid EditorName: %s"), *EditorName)
 
 	
-	// TODO: Have FSSBlueprintEditor::GetToolkitFName use a constant defined somewhere
-	if (EditorName != TEXT("SSBlueprintEditor"))
+	// TODO: Have FSGAttributeSetBlueprintEditor::GetToolkitFName use a constant defined somewhere
+	if (EditorName != TEXT("SGAttributeSetBlueprintEditor"))
 	{
 		Result = EDataValidationResult::Invalid;
 		const FText ErrorText = FText::Format(
 			LOCTEXT(
 				"Invalid_Editor",
-				"Seems like {0} is not using the correct editor (Expected: SSBlueprintEditor, Current: {1}). "
+				"Seems like {0} is not using the correct editor (Expected: SGAttributeSetBlueprintEditor, Current: {1}). "
 				"The blueprint should be created from context menu using the provided factory."
 			),
 			FText::FromString(GetName()),

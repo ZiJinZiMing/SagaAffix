@@ -1,8 +1,8 @@
-﻿/******************************************************************************************
+﻿/***************************************************************************************************************
 * Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 
 
 #include "Meter/Async/AbilityAsync_WaitMeterEmptied.h"

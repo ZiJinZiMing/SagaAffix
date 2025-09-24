@@ -1,8 +1,8 @@
-﻿/******************************************************************************************
+﻿/***************************************************************************************************************
 * Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 #include "SGUtils.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemTestAttributeSet.h"
@@ -181,6 +181,11 @@ bool FSGUtils::IsValidCPPType(const FString& InCPPType)
 	// TODO: Check using FGameplayAttribute::IsGameplayAttributeDataProperty
 
 	return false;
+}
+
+bool FSGUtils::IsValidGameplayAttributePropertyType(const FProperty* Property)
+{
+	return FGameplayAttribute::IsGameplayAttributeDataProperty(Property) || USGAttributeSet::IsGameplayAttributeDataClampedProperty(Property);
 }
 
 void FSGUtils::SerializeAttributeSet(UAttributeSet* InAttributeSet, FArchive& InArchive)

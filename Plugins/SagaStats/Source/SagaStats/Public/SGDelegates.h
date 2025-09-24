@@ -1,15 +1,15 @@
-/******************************************************************************************
+/***************************************************************************************************************
 * Plugin:       SagaStats
 * Author:       Jinming Zhang
-* Description:  SagaStats is a status system that supports fully blueprintable attribute definitions and value calculations.
-******************************************************************************************/
+* Description:  SagaStats offers modular damage process and meter systems to support adaptable status management
+****************************************************************************************************************/
 #pragma once
 
 #include "CoreMinimal.h"
 
 struct SAGASTATS_API FSGDelegates
 {
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnVariableAddedOrRemoved, const FName&);
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnVariableAddedOrRemoved, const FName&, const FName&);
 	DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnVariableRenamed, const FName&, const FName&, const FName&);
 	DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnVariableTypeChanged, const FName&, FString, UObject*);
 	
